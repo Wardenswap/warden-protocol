@@ -1,0 +1,34 @@
+{
+  "name": "warden-protocol",
+  "version": "1.0.0",
+  "description": "Warden protocol",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "TS_NODE_TRANSPILE_ONLY=1 npx hardhat test"
+  },
+  "keywords": [
+    "Warden",
+    "Dex",
+    "Aggregator",
+    "with",
+    "Best",
+    "Rate",
+    "Engine"
+  ],
+  "author": "Arc Warden",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@types/chai": "^4.2.15",
+    "@types/mocha": "^8.2.1",
+    "@types/node": "^14.14.31",
+    "chai": "^4.3.0",
+    "ethereum-waffle": "^3.2.2",
+    "ethers": "^5.0.31",
+    "hardhat": "^2.0.11",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.2"
+  }
+}
