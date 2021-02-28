@@ -4,47 +4,8 @@ pragma solidity 0.5.17;
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "../interfaces/IWardenTradingRoute.sol";
+import "../interfaces/IUniswapV2Router.sol";
 import "../helper/ERC20Interface.sol";
-
-interface IUniswapV2Router {
-    function getAmountsOut(
-        uint amountIn,
-        address[] calldata path
-    )
-    external
-    view
-    returns (uint[] memory amounts);
-
-    function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    )
-    external
-    returns (uint[] memory amounts);
-
-    function swapExactETHForTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    )
-    external
-    payable
-    returns (uint[] memory amounts);
-
-    function swapExactTokensForETH(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    )
-    external
-    returns (uint[] memory amounts);
-}
 
 contract UniswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard, Ownable {
     IUniswapV2Router public constant router = IUniswapV2Router(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
