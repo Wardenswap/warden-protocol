@@ -1,3 +1,4 @@
+require('dotenv').config()
 import { task } from "hardhat/config"
 import "@nomiclabs/hardhat-waffle"
 import { HardhatUserConfig } from "hardhat/config"
@@ -16,7 +17,23 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
-  solidity: '0.5.17',
+  solidity: {
+    version: '0.5.17',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 10000
+      }
+    }
+  },
+  networks: {
+    hardhat: {
+      forking: {
+        url: process.env.MAINNET_FORK_URL as string,
+        blockNumber: 11945200
+      }
+    }
+  }
 }
 
 export default config
