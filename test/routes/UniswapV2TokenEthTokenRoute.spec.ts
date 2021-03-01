@@ -12,12 +12,12 @@ const erc20Abi = [
 ]
 const a16zAddress = '0x05E793cE0C6027323Ac150F6d45C2344d28B6019'
 
-describe('UniswapV2TradingRoute', function() {
+describe('UniswapV2TokenEthTokenRoute', function() {
   const provider = waffle.provider
   const [wallet1, wallet2, wallet3, wallet4, other] = provider.getWallets()
 
   before(async function() {
-    const Route = await ethers.getContractFactory('UniswapV2TradingRoute')
+    const Route = await ethers.getContractFactory('UniswapV2TokenEthTokenTradingRoute')
     this.route = await Route.deploy()
     await this.route.deployed()
 
@@ -48,88 +48,17 @@ describe('UniswapV2TradingRoute', function() {
 
   it('Should emit Trade event properly', async function () {
     const amountIn = utils.parseEther('1')
-    let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.ethAddress, this.daiAddress, amountIn)
+    let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.mkrAddress, this.daiAddress, amountIn)
+    const trader = await ethers.provider.getSigner(a16zAddress)
 
-    await expect(await this.route.trade(
-      this.ethAddress,
+    await this.mkr.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
+    await expect(await this.route.connect(trader).trade(
+      this.mkrAddress,
       this.daiAddress,
-      amountIn,
-      {
-        value: amountIn
-      }
+      amountIn
     ))
     .to.emit(this.route, 'Trade')
-    .withArgs(this.ethAddress, amountIn, this.daiAddress, amountOut)
-  })
-
-  it('Should trade 1 ETH -> DAI correctly', async function() {
-    const amountIn = utils.parseEther('1')
-    let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.ethAddress, this.daiAddress, amountIn)
-    console.log('1 ETH -> ? DAI', utils.formatUnits(amountOut, 18))
-
-    await expect(() => this.route.trade(
-      this.ethAddress,
-      this.daiAddress,
-      amountIn,
-      {
-        value: amountIn
-      }
-    ))
-    .to.changeTokenBalance(this.dai, wallet1, amountOut)
-
-    await expect(() =>  this.route.trade(
-      this.ethAddress,
-      this.daiAddress,
-      amountIn,
-      {
-        value: amountIn
-      }
-    ))
-    .to.changeEtherBalance(wallet1, '-1000000000000000000')
-  })
-
-  it('Should not allow trade 1 ETH -> DAI when provide incorrect amount int', async function() {
-    await expect(this.route.trade(
-      this.ethAddress,
-      this.daiAddress,
-      utils.parseEther('1'),
-      {
-        value: utils.parseEther('0.5')
-      }
-    ))
-    .to.revertedWith('source amount mismatch')
-
-    await expect(this.route.trade(
-      this.ethAddress,
-      this.daiAddress,
-      utils.parseEther('0.5'),
-      {
-        value: utils.parseEther('1')
-      }
-    ))
-    .to.revertedWith('source amount mismatch')
-  })
-
-  it('Should not allow trade 1 MKR -> ETH if balance is not enough', async function() {
-    const amountIn = utils.parseEther('1')
-
-    await expect(this.route.trade(
-      this.mkrAddress,
-      this.ethAddress,
-      amountIn
-    ))
-    .to.be.reverted
-  })
-
-  it('Should not allow trade 1 MKR -> MKR', async function() {
-    const amountIn = utils.parseEther('1')
-
-    await expect(this.route.trade(
-      this.mkrAddress,
-      this.mkrAddress,
-      amountIn
-    ))
-    .to.be.revertedWith('destination token can not be source token')
+    .withArgs(this.mkrAddress, amountIn, this.daiAddress, amountOut)
   })
 
   it('Should trade 1 MKR -> DAI correctly', async function() {
@@ -155,37 +84,43 @@ describe('UniswapV2TradingRoute', function() {
     .to.changeTokenBalance(this.mkr, trader, '-1000000000000000000')
   })
 
-  it('Should trade 1 MKR -> ETH correctly', async function() {
+  it('Should not allow trade 1 ETH -> Any', async function() {
     const amountIn = utils.parseEther('1')
-    let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.mkrAddress, this.ethAddress, amountIn)
-    console.log('1 MKR -> ? ETH', utils.formatUnits(amountOut, 18))
+    await expect(this.route.trade(
+      this.ethAddress,
+      this.daiAddress,
+      amountIn,
+      {
+        value: amountIn
+      }
+    ))
+    .to.revertedWith('Ether exchange is not supported')
+  })
 
+  it('Should not allow trade 1 Any -> ETH', async function() {
+    const amountIn = utils.parseEther('1')
     const trader = await ethers.provider.getSigner(a16zAddress)
 
     await this.mkr.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
-    await expect(() =>  this.route.connect(trader).trade(
+    await expect(this.route.connect(trader).trade(
       this.mkrAddress,
       this.ethAddress,
       amountIn
     ))
-    .to.changeEtherBalance(trader, amountOut)
+    .to.revertedWith('Ether exchange is not supported')
+  })
 
-    await expect(() =>  this.route.connect(trader).trade(
-      this.mkrAddress,
-      this.ethAddress,
-      amountIn
-    ))
-    .to.changeTokenBalance(this.mkr, trader, '-1000000000000000000')
+  it('Should get rate 0 when trading with ETH', async function() {
+    const amountIn = utils.parseEther('1')
+    expect(await this.route.getDestinationReturnAmount(this.ethAddress, this.daiAddress, amountIn))
+    .to.equal(0)
+
+    expect(await this.route.getDestinationReturnAmount(this.mkrAddress, this.ethAddress, amountIn))
+    .to.equal(0)
   })
 
   it('Should get rate properly', async function() {
     const amountIn = utils.parseEther('1')
-    expect(await this.route.getDestinationReturnAmount(this.ethAddress, this.daiAddress, amountIn))
-    .to.not.equal(0)
-
-    expect(await this.route.getDestinationReturnAmount(this.mkrAddress, this.ethAddress, amountIn))
-    .to.not.equal(0)
-
     expect(await this.route.getDestinationReturnAmount(this.mkrAddress, this.daiAddress, amountIn))
     .to.not.equal(0)
   })
