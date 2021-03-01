@@ -124,4 +124,22 @@ describe('UniswapV2TokenEthTokenRoute', function() {
     expect(await this.route.getDestinationReturnAmount(this.mkrAddress, this.daiAddress, amountIn))
     .to.not.equal(0)
   })
+
+  it('Should not allow trade 1 MKR -> MKR', async function() {
+    const amountIn = utils.parseEther('1')
+
+    await expect(this.route.trade(
+      this.mkrAddress,
+      this.mkrAddress,
+      amountIn
+    ))
+    .to.be.revertedWith('destination token can not be source token')
+  })
+
+  it('Should not get rate if source and destination token are the same', async function() {
+    const amountIn = utils.parseEther('100')
+
+    await expect(this.route.getDestinationReturnAmount(this.mkrAddress, this.mkrAddress, amountIn))
+    .to.revertedWith('destination token can not be source token')
+  })
 })

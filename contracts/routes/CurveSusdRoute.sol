@@ -15,8 +15,8 @@ interface ICurve {
     function exchange_underlying(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
 }
 
-contract CurveTradingRoute is IWardenTradingRoute, ReentrancyGuard {
-    ICurve public constant susedPool = ICurve(0xA5407eAE9Ba41422680e2e00537571bcC53efBfD);
+contract CurveSusdTradingRoute is IWardenTradingRoute, ReentrancyGuard {
+    ICurve public constant susdPool = ICurve(0xA5407eAE9Ba41422680e2e00537571bcC53efBfD);
     ERC20 public constant dai = ERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     ERC20 public constant usdc = ERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
     ERC20 public constant usdt = ERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
@@ -48,8 +48,8 @@ contract CurveTradingRoute is IWardenTradingRoute, ReentrancyGuard {
 
         uint256 balanceBefore = _dest.balanceOf(address(this));
         _src.transferFrom(msg.sender, address(this), _srcAmount);
-        _src.approve(address(susedPool), _srcAmount);
-        susedPool.exchange_underlying(i, j, _srcAmount, 0);
+        _src.approve(address(susdPool), _srcAmount);
+        susdPool.exchange_underlying(i, j, _srcAmount, 0);
         uint256 balanceAfter = _dest.balanceOf(address(this));
         _destAmount = balanceAfter - balanceBefore;
         _dest.transfer(msg.sender, _destAmount);
@@ -79,6 +79,6 @@ contract CurveTradingRoute is IWardenTradingRoute, ReentrancyGuard {
         j = _dest == susd ? 3 : j;
         require(i != -1 && j != -1, "tokens're not supported!");
 
-        return susedPool.get_dy_underlying(i, j, _srcAmount);
+        return susdPool.get_dy_underlying(i, j, _srcAmount);
     }
 }
