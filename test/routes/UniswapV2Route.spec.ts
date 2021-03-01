@@ -35,12 +35,10 @@ describe('UniswapV2TradingRoute', function() {
   })
 
   it('Should initial data correctly', async function() {
-    expect(await this.route.owner()).to.properAddress
     expect(await this.route.router()).to.properAddress
     expect(await this.route.etherERC20()).to.properAddress
     expect(await this.route.wETH()).to.properAddress
 
-    expect(await this.route.owner()).to.equal(wallet1.address)
     expect(await this.route.router()).to.equal('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D')
     expect(await this.route.etherERC20()).to.equal(this.ethAddress)
     expect(await this.route.wETH()).to.equal('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2')

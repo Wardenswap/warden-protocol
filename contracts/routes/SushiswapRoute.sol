@@ -2,12 +2,11 @@
 pragma solidity 0.5.17;
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
-import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 import "../interfaces/IUniswapV2Router.sol";
 import "../helper/ERC20Interface.sol";
 
-contract SushiswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard, Ownable {
+contract SushiswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
     IUniswapV2Router public constant router = IUniswapV2Router(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
     ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
     ERC20 public constant wETH = ERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);

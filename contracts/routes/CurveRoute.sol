@@ -2,7 +2,6 @@
 pragma solidity 0.5.17;
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
-import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 import "../helper/ERC20Interface.sol";
 
@@ -16,7 +15,7 @@ interface ICurve {
     function exchange_underlying(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
 }
 
-contract CurveTradingRoute is IWardenTradingRoute, ReentrancyGuard, Ownable {
+contract CurveTradingRoute is IWardenTradingRoute, ReentrancyGuard {
     ICurve public constant susedPool = ICurve(0xA5407eAE9Ba41422680e2e00537571bcC53efBfD);
     ERC20 public constant dai = ERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     ERC20 public constant usdc = ERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
