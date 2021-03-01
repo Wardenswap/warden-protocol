@@ -1,6 +1,7 @@
 require('dotenv').config()
 import { task } from "hardhat/config"
 import "@nomiclabs/hardhat-waffle"
+import "solidity-coverage"
 import { HardhatUserConfig } from "hardhat/config"
 
 // This is a sample Hardhat task. To learn how to create your own go to

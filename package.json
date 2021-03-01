@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
-    "test": "TS_NODE_TRANSPILE_ONLY=1 npx hardhat test"
+    "test": "TS_NODE_TRANSPILE_ONLY=1 npx hardhat test",
+    "test:coverage": "NODE_OPTIONS=\"--max-old-space-size=2048\" hardhat coverage"
   },
   "keywords": [
     "Warden",
@@ -30,6 +31,7 @@
     "ethereum-waffle": "^3.2.2",
     "ethers": "^5.0.31",
     "hardhat": "^2.0.11",
+    "solidity-coverage": "^0.7.15",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.2"
   }
