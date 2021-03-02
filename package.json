@@ -1,6 +1,7 @@
 {
   "name": "warden-protocol",
   "version": "1.0.0",
+  "types": "./types/index.ts",
   "description": "Warden protocol",
   "main": "index.js",
   "scripts": {
@@ -23,6 +24,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/contracts": "^2.5.0",
+    "@typechain/ethers-v5": "^6.0.1",
     "@types/chai": "^4.2.15",
     "@types/mocha": "^8.2.1",
     "@types/node": "^14.14.31",
@@ -31,6 +33,7 @@
     "ethereum-waffle": "^3.2.2",
     "ethers": "^5.0.31",
     "hardhat": "^2.0.11",
+    "hardhat-typechain": "^0.3.5",
     "solidity-coverage": "^0.7.15",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.2"
