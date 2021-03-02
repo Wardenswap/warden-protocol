@@ -27,7 +27,7 @@ contract RoutingManagement is Ownable {
     event EnabledTradingRoute(
         address indexed enabledBy,
         string name,
-        IWardenTradingRoute routingAddress,
+        IWardenTradingRoute indexed routingAddress,
         uint256 indexed index
     );
 

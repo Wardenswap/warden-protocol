@@ -17,7 +17,7 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
     );
 
     using SafeMath for uint256;
-    ERC20 public etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /**
     * @notice use token address 0xeee...eee for ether
