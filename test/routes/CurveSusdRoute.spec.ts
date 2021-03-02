@@ -3,15 +3,8 @@ import hre from 'hardhat'
 // import { BigNumber, bigNumberify } from 'hardhat'
 import { Signer, utils, Contract, BigNumber } from 'ethers'
 import { expect } from 'chai'
-
-const erc20Abi = [
-  'function balanceOf(address owner) view returns (uint)',
-  'function transfer(address to, uint amount)',
-  'function approve(address spender, uint256 value) external returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint amount)'
-]
-const a16zAddress = '0x05E793cE0C6027323Ac150F6d45C2344d28B6019'
-const binance8 = '0xF977814e90dA44bFA03b6295A0616a897441aceC'
+import ERC20Abi from '../helpers/erc20Abi.json'
+import WhaleAddresses from '../helpers/whaleAddresses.json'
 
 describe('CurveSusdTradingRoute', function() {
   const provider = waffle.provider
@@ -29,22 +22,22 @@ describe('CurveSusdTradingRoute', function() {
     this.susdAddress = '0x57Ab1ec28D129707052df4dF418D58a2D46d5f51'
     this.mkrAddress = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'
 
-    this.dai = await ethers.getContractAt(erc20Abi, this.daiAddress)
-    this.usdc = await ethers.getContractAt(erc20Abi, this.usdcAddress)
-    this.usdt = await ethers.getContractAt(erc20Abi, this.usdtAddress)
-    this.susd = await ethers.getContractAt(erc20Abi, this.susdAddress)
-    this.mkr = await ethers.getContractAt(erc20Abi, this.mkrAddress)
+    this.dai = await ethers.getContractAt(ERC20Abi, this.daiAddress)
+    this.usdc = await ethers.getContractAt(ERC20Abi, this.usdcAddress)
+    this.usdt = await ethers.getContractAt(ERC20Abi, this.usdtAddress)
+    this.susd = await ethers.getContractAt(ERC20Abi, this.susdAddress)
+    this.mkr = await ethers.getContractAt(ERC20Abi, this.mkrAddress)
 
-    this.trader = await ethers.provider.getSigner(a16zAddress)
-    this.trader2 = await ethers.provider.getSigner(binance8)
+    this.trader = await ethers.provider.getSigner(WhaleAddresses.a16zAddress)
+    this.trader2 = await ethers.provider.getSigner(WhaleAddresses.binance8)
 
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: [a16zAddress]}
+      params: [WhaleAddresses.a16zAddress]}
     )
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: [binance8]}
+      params: [WhaleAddresses.binance8]}
     )
   })
 

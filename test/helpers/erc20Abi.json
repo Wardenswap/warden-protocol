@@ -1,0 +1,6 @@
+[
+  "function balanceOf(address owner) view returns (uint)",
+  "function transfer(address to, uint amount)",
+  "function approve(address spender, uint256 value) external returns (bool)",
+  "event Transfer(address indexed from, address indexed to, uint amount)"
+]

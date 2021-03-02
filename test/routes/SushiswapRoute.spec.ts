@@ -3,14 +3,8 @@ import hre from 'hardhat'
 // import { BigNumber, bigNumberify } from 'hardhat'
 import { Signer, utils, Contract, BigNumber } from 'ethers'
 import { expect } from 'chai'
-
-const erc20Abi = [
-  'function balanceOf(address owner) view returns (uint)',
-  'function transfer(address to, uint amount)',
-  'function approve(address spender, uint256 value) external returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint amount)'
-]
-const binance7 = '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8'
+import ERC20Abi from '../helpers/erc20Abi.json'
+import WhaleAddresses from '../helpers/whaleAddresses.json'
 
 describe('SushiswapV2TradingRoute', function() {
   const provider = waffle.provider
@@ -27,14 +21,16 @@ describe('SushiswapV2TradingRoute', function() {
     this.usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     this.usdtAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 
-    this.dai = await ethers.getContractAt(erc20Abi, this.daiAddress)
-    this.sushi = await ethers.getContractAt(erc20Abi, this.sushiAddress)
-    this.usdc = await ethers.getContractAt(erc20Abi, this.usdcAddress)
-    this.usdt = await ethers.getContractAt(erc20Abi, this.usdtAddress)
+    this.dai = await ethers.getContractAt(ERC20Abi, this.daiAddress)
+    this.sushi = await ethers.getContractAt(ERC20Abi, this.sushiAddress)
+    this.usdc = await ethers.getContractAt(ERC20Abi, this.usdcAddress)
+    this.usdt = await ethers.getContractAt(ERC20Abi, this.usdtAddress)
+
+    this.trader = await ethers.provider.getSigner(WhaleAddresses.binance7)
 
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: [binance7]}
+      params: [WhaleAddresses.binance7]}
     )
   })
 
@@ -130,22 +126,20 @@ describe('SushiswapV2TradingRoute', function() {
     let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.usdcAddress, this.usdtAddress, amountIn)
     console.log('100 USDC -> ? USDT', utils.formatUnits(amountOut, 18))
 
-    const trader = await ethers.provider.getSigner(binance7)
-
-    await this.usdc.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
-    await expect(() =>  this.route.connect(trader).trade(
+    await this.usdc.connect(this.trader).approve(this.route.address, ethers.constants.MaxUint256)
+    await expect(() =>  this.route.connect(this.trader).trade(
       this.usdcAddress,
       this.usdtAddress,
       amountIn
     ))
-    .to.changeTokenBalance(this.usdt, trader, amountOut)
+    .to.changeTokenBalance(this.usdt, this.trader, amountOut)
 
-    await expect(() =>  this.route.connect(trader).trade(
+    await expect(() =>  this.route.connect(this.trader).trade(
       this.usdcAddress,
       this.usdtAddress,
       amountIn
     ))
-    .to.changeTokenBalance(this.usdc, trader, '-100000000')
+    .to.changeTokenBalance(this.usdc, this.trader, '-100000000')
   })
 
   it('Should trade 1 SUSHI -> ETH correctly', async function() {
@@ -153,22 +147,20 @@ describe('SushiswapV2TradingRoute', function() {
     let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.sushiAddress, this.ethAddress, amountIn)
     console.log('1 SUSHI -> ? ETH', utils.formatUnits(amountOut, 18))
 
-    const trader = await ethers.provider.getSigner(binance7)
-
-    await this.sushi.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
-    await expect(() =>  this.route.connect(trader).trade(
+    await this.sushi.connect(this.trader).approve(this.route.address, ethers.constants.MaxUint256)
+    await expect(() =>  this.route.connect(this.trader).trade(
       this.sushiAddress,
       this.ethAddress,
       amountIn
     ))
-    .to.changeEtherBalance(trader, amountOut)
+    .to.changeEtherBalance(this.trader, amountOut)
 
-    await expect(() =>  this.route.connect(trader).trade(
+    await expect(() =>  this.route.connect(this.trader).trade(
       this.sushiAddress,
       this.ethAddress,
       amountIn
     ))
-    .to.changeTokenBalance(this.sushi, trader, '-1000000000000000000')
+    .to.changeTokenBalance(this.sushi, this.trader, '-1000000000000000000')
   })
 
   it('Should get rate properly', async function() {

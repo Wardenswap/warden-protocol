@@ -3,14 +3,8 @@ import hre from 'hardhat'
 // import { BigNumber, bigNumberify } from 'hardhat'
 import { Signer, utils, Contract, BigNumber } from 'ethers'
 import { expect } from 'chai'
-
-const erc20Abi = [
-  'function balanceOf(address owner) view returns (uint)',
-  'function transfer(address to, uint amount)',
-  'function approve(address spender, uint256 value) external returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint amount)'
-]
-const a16zAddress = '0x05E793cE0C6027323Ac150F6d45C2344d28B6019'
+import ERC20Abi from '../helpers/erc20Abi.json'
+import WhaleAddresses from '../helpers/whaleAddresses.json'
 
 describe('UniswapV2TokenEthTokenRoute', function() {
   const provider = waffle.provider
@@ -25,12 +19,14 @@ describe('UniswapV2TokenEthTokenRoute', function() {
     this.daiAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
     this.mkrAddress = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'
 
-    this.dai = await ethers.getContractAt(erc20Abi, this.daiAddress)
-    this.mkr = await ethers.getContractAt(erc20Abi, this.mkrAddress)
+    this.dai = await ethers.getContractAt(ERC20Abi, this.daiAddress)
+    this.mkr = await ethers.getContractAt(ERC20Abi, this.mkrAddress)
+
+    this.trader = await ethers.provider.getSigner(WhaleAddresses.a16zAddress)
 
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: [a16zAddress]}
+      params: [WhaleAddresses.a16zAddress]}
     )
   })
 
@@ -49,10 +45,9 @@ describe('UniswapV2TokenEthTokenRoute', function() {
   it('Should emit Trade event properly', async function () {
     const amountIn = utils.parseEther('1')
     let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.mkrAddress, this.daiAddress, amountIn)
-    const trader = await ethers.provider.getSigner(a16zAddress)
 
-    await this.mkr.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
-    await expect(await this.route.connect(trader).trade(
+    await this.mkr.connect(this.trader).approve(this.route.address, ethers.constants.MaxUint256)
+    await expect(await this.route.connect(this.trader).trade(
       this.mkrAddress,
       this.daiAddress,
       amountIn
@@ -66,22 +61,20 @@ describe('UniswapV2TokenEthTokenRoute', function() {
     let amountOut: BigNumber = await this.route.getDestinationReturnAmount(this.mkrAddress, this.daiAddress, amountIn)
     console.log('1 MKR -> ? DAI', utils.formatUnits(amountOut, 18))
 
-    const trader = await ethers.provider.getSigner(a16zAddress)
-
-    await this.mkr.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
-    await expect(() =>  this.route.connect(trader).trade(
+    await this.mkr.connect(this.trader).approve(this.route.address, ethers.constants.MaxUint256)
+    await expect(() =>  this.route.connect(this.trader).trade(
       this.mkrAddress,
       this.daiAddress,
       amountIn
     ))
-    .to.changeTokenBalance(this.dai, trader, amountOut)
+    .to.changeTokenBalance(this.dai, this.trader, amountOut)
 
-    await expect(() =>  this.route.connect(trader).trade(
+    await expect(() =>  this.route.connect(this.trader).trade(
       this.mkrAddress,
       this.daiAddress,
       amountIn
     ))
-    .to.changeTokenBalance(this.mkr, trader, '-1000000000000000000')
+    .to.changeTokenBalance(this.mkr, this.trader, '-1000000000000000000')
   })
 
   it('Should not allow trade 1 ETH -> Any', async function() {
@@ -99,10 +92,9 @@ describe('UniswapV2TokenEthTokenRoute', function() {
 
   it('Should not allow trade 1 Any -> ETH', async function() {
     const amountIn = utils.parseEther('1')
-    const trader = await ethers.provider.getSigner(a16zAddress)
 
-    await this.mkr.connect(trader).approve(this.route.address, ethers.constants.MaxUint256)
-    await expect(this.route.connect(trader).trade(
+    await this.mkr.connect(this.trader).approve(this.route.address, ethers.constants.MaxUint256)
+    await expect(this.route.connect(this.trader).trade(
       this.mkrAddress,
       this.ethAddress,
       amountIn
