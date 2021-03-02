@@ -16,7 +16,12 @@ interface IWardenTradingRoute {
     * @param _dest   Destination token
     * @return _destAmount: amount of actual destination tokens
     */
-    event Trade(ERC20 _src, uint256 _srcAmount, ERC20 _dest, uint256 _destAmount);
+    event Trade(
+        ERC20 indexed _src,
+        uint256 _srcAmount,
+        ERC20 indexed _dest,
+        uint256 _destAmount
+    );
 
     /**
     * @notice use token address 0xeee...eee for ether

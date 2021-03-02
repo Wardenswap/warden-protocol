@@ -7,15 +7,6 @@ import "./interfaces/IWardenSwap.sol";
 import "./Partnership.sol";
 
 contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
-    event Trade(
-        address indexed srcAsset, // Source
-        uint256         srcAmount,
-        address indexed destAsset, // Destination
-        uint256         destAmount,
-        address indexed trader, // User
-        uint256         fee // System fee
-    );
-
     using SafeMath for uint256;
     ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
@@ -217,7 +208,7 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
         // Collect fee
         uint256 remainingAmount = collectFee(partnerIndex, destAmount, dest);
 
-        emit Trade(address(src), srcAmount, address(dest), remainingAmount, msg.sender, 0);
+        emit Trade(address(src), srcAmount, address(dest), remainingAmount, msg.sender);
         return remainingAmount;
     }
 
@@ -285,7 +276,7 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
           remainingAmount = collectFee(partnerIndex, destAmount, destTokens[destTokens.length - 1]);
         }
 
-        emit Trade(address(srcTokens[0]), srcAmount, address(destTokens[destTokens.length - 1]), remainingAmount, msg.sender, 0);
+        emit Trade(address(srcTokens[0]), srcAmount, address(destTokens[destTokens.length - 1]), remainingAmount, msg.sender);
         return remainingAmount;
     }
 
@@ -340,7 +331,7 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
         // Collect fee
         uint256 remainingAmount = collectFee(partnerIndex, destAmount, dest);
 
-        emit Trade(address(src), srcAmount, address(dest), remainingAmount, msg.sender, 0);
+        emit Trade(address(src), srcAmount, address(dest), remainingAmount, msg.sender);
         return remainingAmount;
     }
 

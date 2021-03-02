@@ -5,14 +5,21 @@ import "../helper/ERC20Interface.sol";
 import "./IWardenTradingRoute.sol";
 
 interface IWardenSwap {
-  // /**
-  // * @dev when new trade occure (and success), this event will be boardcast.
-  // * @param _src Source token
-  // * @param _srcAmount amount of source tokens
-  // * @param _dest   Destination token
-  // * @return _destAmount: amount of actual destination tokens
-  // */
-  // event Trade(ERC20 _src, uint256 _srcAmount, ERC20 _dest, uint256 _destAmount);
+  /**
+  * @dev when new trade occure (and success), this event will be boardcast.
+  * @param srcAsset Source token
+  * @param srcAmount amount of source token
+  * @param destAsset Destination token
+  * @param destAmount amount of destination token
+  * @param trader user address
+  */
+  event Trade(
+    address indexed srcAsset, // Source
+    uint256         srcAmount,
+    address indexed destAsset, // Destination
+    uint256         destAmount,
+    address indexed trader // User
+  );
 
   /**
   * @notice use token address 0xeee...eee for ether

@@ -133,7 +133,7 @@ describe('RoutingManagement', function() {
       .to.revertedWith('caller is not the owner')
     })
 
-    it('Should not allow to enable trading route if not owner', async function() {
+    it('Should not allow to disable trading route if not owner', async function() {
       await expect(this.manager.connect(wallet2).disableTradingRoute(this.uniswapIndex))
       .to.revertedWith('caller is not the owner')
     })
