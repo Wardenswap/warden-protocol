@@ -27,17 +27,17 @@ describe('WardenSwap', () => {
   const provider = waffle.provider
   const [wallet1, wallet2, wallet3, reserve, other] = provider.getWallets()
 
-  before(async () => {
-    await network.provider.request({
-      method: "hardhat_reset",
-      params: [{
-        forking: {
-          jsonRpcUrl: config.networks.hardhat.forking!.url,
-          blockNumber: config.networks.hardhat.forking!.blockNumber
-        }
-      }]
-    })
-  })
+  // before(async () => {
+  //   await network.provider.request({
+  //     method: "hardhat_reset",
+  //     params: [{
+  //       forking: {
+  //         jsonRpcUrl: config.networks.hardhat.forking!.url,
+  //         blockNumber: config.networks.hardhat.forking!.blockNumber
+  //       }
+  //     }]
+  //   })
+  // })
 
   beforeEach(async () => {
     warden = await (await ethers.getContractFactory('WardenSwap')).deploy() as WardenSwap
@@ -117,7 +117,7 @@ describe('WardenSwap', () => {
         const amountIn = utils.parseEther('1')
         const src = Assets.ETH.address
         const dest = Assets.DAI.address
-        const expectedAmountOut = '1354.545880893789673778'
+        const expectedAmountOut = '1354.143199959701156686'
         const amountOut = await warden.getDestinationReturnAmount(uniswapIndex, src, dest, amountIn, 0)
         expect(utils.formatUnits(amountOut, 18))
         .to.equal(expectedAmountOut)
@@ -127,7 +127,7 @@ describe('WardenSwap', () => {
         const amountIn = utils.parseUnits('1500', 18)
         const src = Assets.DAI.address
         const dest = Assets.ETH.address
-        const expectedAmountOut = '1.098499270263360865'
+        const expectedAmountOut = '1.098825930140218641'
         const amountOut = await warden.getDestinationReturnAmount(uniswapIndex, src, dest, amountIn, 0)
         expect(utils.formatEther(amountOut))
         .to.equal(expectedAmountOut)
@@ -149,7 +149,7 @@ describe('WardenSwap', () => {
       const src = Assets.ETH.address
       const dest = Assets.DAI.address
       
-      const expectedAmountOut = BigNumber.from('1354545880893789673778')
+      const expectedAmountOut = BigNumber.from('1354143199959701156686')
       const minDestAmount = utils.parseUnits('1350', 18)
 
       afterEach(async () => {
@@ -224,8 +224,8 @@ describe('WardenSwap', () => {
       const src = Assets.DAI.address
       const dest = Assets.ETH.address
       
-      const expectedAmountOut = BigNumber.from('2563407726381404289')
-      const expectedFee = BigNumber.from('2565973700081485')
+      const expectedAmountOut = BigNumber.from('2564169945400464667')
+      const expectedFee = BigNumber.from('2566736682082547')
       const minDestAmount = utils.parseUnits('2.50', 18)
 
       beforeEach(async () => {

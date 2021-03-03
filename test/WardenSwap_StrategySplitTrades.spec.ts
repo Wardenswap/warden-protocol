@@ -28,17 +28,17 @@ describe('WardenSwap', () => {
   const provider = waffle.provider
   const [wallet1, wallet2, wallet3, reserve, other] = provider.getWallets()
 
-  before(async () => {
-    await network.provider.request({
-      method: "hardhat_reset",
-      params: [{
-        forking: {
-          jsonRpcUrl: config.networks.hardhat.forking!.url,
-          blockNumber: config.networks.hardhat.forking!.blockNumber
-        }
-      }]
-    })
-  })
+  // before(async () => {
+  //   await network.provider.request({
+  //     method: "hardhat_reset",
+  //     params: [{
+  //       forking: {
+  //         jsonRpcUrl: config.networks.hardhat.forking!.url,
+  //         blockNumber: config.networks.hardhat.forking!.blockNumber
+  //       }
+  //     }]
+  //   })
+  // })
 
   beforeEach(async () => {
     warden = await (await ethers.getContractFactory('WardenSwap')).deploy() as WardenSwap
@@ -103,9 +103,9 @@ describe('WardenSwap', () => {
         const amountIns = [utils.parseEther('2'), utils.parseEther('3')]
         const src = Assets.ETH.address
         const dest = Assets.DAI.address
-        const expectedAmountOut1 = '2709.035227688124666907'
-        const expectedAmountOut2 = '4065.551797306012776047'
-        const expectedAmountOut = '6774.587024994137442954'
+        const expectedAmountOut1 = '2708.764504945937131436'
+        const expectedAmountOut2 = '4065.286467051489162512'
+        const expectedAmountOut = '6774.050971997426293948'
   
         const amountOut = await warden.getDestinationReturnAmountForSplitTrades(
           [uniswapIndex, sushiswapIndex],
@@ -126,9 +126,9 @@ describe('WardenSwap', () => {
         const amountIns = [utils.parseUnits('1500', 18), utils.parseUnits('3500', 18)]
         const src = Assets.DAI.address
         const dest = Assets.ETH.address
-        const expectedAmountOut1 = '1.098499270263360865'
-        const expectedAmountOut2 = '2.561915545561377885'
-        const expectedAmountOut = '3.660414815824738749'
+        const expectedAmountOut1 = '1.09860905892368178'
+        const expectedAmountOut2 = '2.562082755257136736'
+        const expectedAmountOut = '3.660691814180818516'
   
         const amountOut = await warden.getDestinationReturnAmountForSplitTrades(
           [uniswapIndex, sushiswapIndex],
@@ -149,9 +149,9 @@ describe('WardenSwap', () => {
         const amountIns = [utils.parseUnits('2000', 18), utils.parseUnits('4000', 18)]
         const src = Assets.DAI.address
         const dest = Assets.USDC.address
-        const expectedAmountOut1 = '1992.106083'
+        const expectedAmountOut1 = '1989.931091'
         const expectedAmountOut2 = '3314.195143'
-        const expectedAmountOut = '5306.301226'
+        const expectedAmountOut = '5304.126234'
   
         const amountOut = await warden.getDestinationReturnAmountForSplitTrades(
           [uniswapIndex, sushiswapIndex],
@@ -174,7 +174,7 @@ describe('WardenSwap', () => {
       const totalAmountIn = utils.parseEther('8')
       const src = Assets.ETH.address
       const dest = Assets.DAI.address
-      const expectedAmountOut = '10839240520227284224833'
+      const expectedAmountOut = '10838392246196753680136'
       const minDestAmount = utils.parseUnits('10830', 18)
 
       afterEach(async () => {
@@ -263,8 +263,8 @@ describe('WardenSwap', () => {
       const totalAmountIn = utils.parseEther('4400')
       const src = Assets.DAI.address
       const dest = Assets.ETH.address
-      const expectedAmountOut = BigNumber.from('3222226937721300271')
-      const expectedFee = BigNumber.from('3225452390111411')
+      const expectedAmountOut = BigNumber.from('3222467688480288521')
+      const expectedFee = BigNumber.from('3225693381862150')
       const minDestAmount = utils.parseUnits('3.20', 18)
 
       beforeEach(async () => {
@@ -344,7 +344,7 @@ describe('WardenSwap', () => {
       const totalAmountIn = utils.parseUnits('6000', 18)
       const src = Assets.DAI.address
       const dest = Assets.USDC.address
-      const expectedAmountOut = '5454268847'
+      const expectedAmountOut = '5451550292'
       const minDestAmount = utils.parseUnits('1000', 6)
 
       beforeEach(async () => {
