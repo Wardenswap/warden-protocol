@@ -72,6 +72,9 @@ contract Partnership is RoutingManagement {
         returns(uint256 remainingAmount)
     {
         Partner storage partner = partners[partnerIndex];
+        if (partner.wallet == 0x0000000000000000000000000000000000000000) {
+          partner = partners[0];
+        }
         if (partner.fee == 0) {
             return amount;
         }

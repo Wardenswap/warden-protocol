@@ -1,6 +1,6 @@
 import { ethers, waffle, network } from 'hardhat'
 import { expect } from 'chai'
-import { Partnership } from "../types/Partnership";
+import { Partnership } from "../typechain/Partnership";
 
 
 describe('Partnership', () => {

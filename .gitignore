@@ -6,4 +6,4 @@ artifacts
 .env
 coverage
 coverage.json
-types
+typechain

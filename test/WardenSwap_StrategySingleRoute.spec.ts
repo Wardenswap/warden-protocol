@@ -4,13 +4,14 @@ import { Signer, utils, Contract, BigNumber } from 'ethers'
 import ERC20Abi from './helpers/erc20Abi.json'
 import WhaleAddresses from './helpers/whaleAddresses.json'
 import { main as Assets } from './helpers/assets'
-import { WardenSwap } from "../types/WardenSwap";
+import { WardenSwap } from '../typechain/WardenSwap'
+import { IWardenTradingRoute } from '../typechain/IWardenTradingRoute'
 
-describe('WardenSwap', () => {
+describe('WardenSwap: Single route strategy', () => {
   let warden: WardenSwap
-  let uniswapRoute: Contract
-  let sushiswapRoute: Contract
-  let curveRoute: Contract
+  let uniswapRoute: IWardenTradingRoute
+  let sushiswapRoute: IWardenTradingRoute
+  let curveRoute: IWardenTradingRoute
   let dai: Contract
   let usdc: Contract
   let usdt: Contract
@@ -21,7 +22,7 @@ describe('WardenSwap', () => {
   let trader2: Signer
   let trader3: Signer
 
-  let partnerIndex = 0
+  const partnerIndex = 0
 
   const defaultFee = BigNumber.from(10) // 0.1%
   const provider = waffle.provider
@@ -45,13 +46,13 @@ describe('WardenSwap', () => {
     const partner0 = await warden.partners(0)
     await warden.updatePartner(0, reserve.address, partner0.fee, partner0.name)
 
-    uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy()
+    uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy() as IWardenTradingRoute
     await uniswapRoute.deployed()
 
-    sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy()
+    sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy() as IWardenTradingRoute
     await sushiswapRoute.deployed()
 
-    curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy()
+    curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy() as IWardenTradingRoute
     await curveRoute.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address)
@@ -76,21 +77,6 @@ describe('WardenSwap', () => {
       method: 'hardhat_impersonateAccount',
       params: [WhaleAddresses.binance8]}
     )
-  })
-
-  it('Should initial data correctly', async () => {
-    expect(await warden.etherERC20()).to.properAddress
-    expect(await warden.owner()).to.properAddress
-
-    expect(await warden.etherERC20()).to.equal(Assets.ETH.address)
-    expect(await warden.owner()).to.equal(wallet1.address)
-
-    // Platform Fee
-    const partner = await warden.partners(0)
-    const expectedName = ethers.utils.formatBytes32String('WARDEN').slice(0, 34)
-    expect(partner.wallet).to.equal(reserve.address)
-    expect(partner.fee).to.equal(defaultFee)
-    expect(partner.name).to.equal(expectedName)
   })
 
   describe('Deploy trading routes', async () => {

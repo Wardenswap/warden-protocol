@@ -4,10 +4,10 @@ import { Signer, utils, Contract, BigNumber } from 'ethers'
 import ERC20Abi from './helpers/erc20Abi.json'
 import WhaleAddresses from './helpers/whaleAddresses.json'
 import { main as Assets } from './helpers/assets'
-import { WardenSwap } from '../types/WardenSwap'
-import { IWardenTradingRoute } from '../types/IWardenTradingRoute'
+import { WardenSwap } from '../typechain/WardenSwap'
+import { IWardenTradingRoute } from '../typechain/IWardenTradingRoute'
 
-describe('WardenSwap', () => {
+describe('WardenSwap: Split trades strategy', () => {
   let warden: WardenSwap
   let uniswapRoute: IWardenTradingRoute
   let sushiswapRoute: IWardenTradingRoute
