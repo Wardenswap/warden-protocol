@@ -3,6 +3,8 @@ pragma solidity 0.5.17;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./RoutingManagement.sol";
+import "hardhat/console.sol";
+
 
 /*
 * Fee collection by partner reference
@@ -44,10 +46,12 @@ contract Partnership is RoutingManagement {
       bytes16 name;         // Partner reference
     }
 
+    ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+
     mapping(uint256 => Partner) public partners;
 
     constructor() public {
-        Partner memory partner = Partner(msg.sender, 10, "WARDEN");
+        Partner memory partner = Partner(msg.sender, 10, "WARDEN"); // 0.1%
         partners[0] = partner;
         emit UpdatePartner(0, msg.sender, 10, "WARDEN");
     }
@@ -79,16 +83,31 @@ contract Partnership is RoutingManagement {
         internal
         returns(uint256 remainingAmount)
     {
+        console.log("partnerIndex %s", partnerIndex);
         Partner storage partner = partners[partnerIndex];
+        console.log("partner fee: %d", partner.fee);
+        console.log("partner wallet: %s", partner.wallet);
+        console.log("token", address(token));
         if (partner.wallet == 0x0000000000000000000000000000000000000000) {
           partner = partners[0];
         }
         if (partner.fee == 0) {
             return amount;
         }
+        console.log("amount: %s", amount);
         uint256 fee = amount.mul(partner.fee).div(10000);
+        console.log("fee: %s", fee);
         require(fee < amount, "fee exceeds return amount!");
-        token.transfer(partner.wallet, fee);
+        if (etherERC20 == token) {
+            console.log("contract balance 1: %s", address(this).balance);
+            (bool success, ) = partner.wallet.call.value(fee)(""); // Send back ether to sender
+            require(success, "Transfer fee of ether failed.");
+            console.log("contract balance 2: %s", address(this).balance);
+        } else {
+            console.log("contract balance 1: %s", token.balanceOf(address(this)));
+            token.transfer(partner.wallet, fee);
+            console.log("contract balance 2: %s", token.balanceOf(address(this)));
+        }
         emit CollectFee(partnerIndex, token, partner.wallet, fee);
 
         return amount.sub(fee);

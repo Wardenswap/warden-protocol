@@ -30,15 +30,66 @@ pragma solidity 0.5.17;
 //                   .,,,         ,/%&@@@@@@@@&%(*        .,,,.                    
 //                                   ,/%&@@@%(*.                                   
 //  .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,**((/*,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//                                                                                                                                                                                                                                                                                                            
+//                                                                                                                                                                                                                                                                                                            
+//                                                                                                                                                                                                                                                                                                            
+//                 `````                                                          ```````                                                                                                                                                                                                                     
+//                 ``````````                                                ``````````                                                                                                                                                                                                                       
+//                 ````````````                                            ````````````                                                                                                                                                                                                                       
+//                 `````````````                                           ````````````                                                                                                                                                                                                                       
+//                 ```````````````                                      ```````````````                                                                                                                                                                                                                       
+//                 ```````````````                                      ```````````````                                                                                                                                                                                                                       
+//                 `````````````````                                  `````````````````                                                                                                                                                                                                                       
+//                 `````````````````                                  `````````````````                                  ````        ```                `````          `````             `` ```      `               `   `     ``             ``       ``      `        ````                                  
+//                 ``````````````````                                ``````````````````                                ``````        ``````            ``````         ```````            ``````````````````         ``````````````````        ``````````````````        ``````           ``````               
+//                 ``````````````````                                ``````````````````                                ````````      ``````           ``````          ````````           ````````````````````       ````````````````````      ``````````````````        ````````         ``````               
+//                 ``````````````````                `               ``````````````````                                  ``````      ```````          ``````         `````````           `````````````````````      ``````````````````````    ``````````````````        `````````        ``````               
+//                 ````````````````````            ````             ```````````````````                                  ``````       ```````       ```````          ``````````          ``````         ``````      `````          ```````    ``````                    `````````        ``````               
+//                 ````````````````````          ````````          ````````````````````                                   `...```     `.....`       `....`         `````````````         ``````         ``````      `````          ```````    ``````                    ```````````      ``````               
+//                 ````````````````````         ``````````         ````````````````````                                   `.....`     `.......      `...``         ``````  `````         ``````         ``````      `````          ```````    ```````                   ```````````      ``````               
+//                 ````````````````````         ````````````       ````````````````````                                    `....``    `.......     `....`         ``````   ``````        ``````     ``````````      `````          ```````    `````````````````         ````` ```````    ``````               
+//                 ````````````````````       ``````````````       ````````````````````                                     ......   .........``  `....``         ``````    `````        ````````````````````       `````          ```````    `````````````````         `````  ```````   ``````               
+//                 ````````````````````       ```````````````      ````````````````````                                     `.....   ..........` ``....         ```````     ```````      ``````````````````         `````          ```````    `````````````````         `````    ``````  ``````               
+//                 ````````````````````      ````````````````      ````````````````````                                      `.....``....``....``......         ````````````````````     ``````  ````````           `````          ```````    ``````                    `````     `````````````               
+//                 ````````````````````     ```````````````````    ````````````````````                                      `...........` ..........`         `````````````````````     ``````    ````````         `````          ```````    ``````                    `````      ````````````               
+//                 ````````````````````    ````````````````````    ````````````````````                                        .........   `.........`         ``````         ```````    ``````      ``````         `````          ```````    ``````                    `````       ```````````               
+//                 ````````````````````    `````````````````````   ````````````````````                                        .........    `.......`         `````             ``````   ``````       ```````       ````````````````````      ``````````````````        `````        ``````````               
+//                  ```````````````````    `````````````````````   ```````````````````                                          `.....`     `.......         ``````             ``````   ``````         ``````      ````````````````````      ``````````````````        `````          ````````               
+//                  ```````````````````    `````````````````````   ```````````````````                                          ```````       ``````         `````               `````   ``````         ``````      `````````````````         ``````````````````        ````           ````````               
+//                     ````````````````    ``````````````````````  `````````````````                                                                                                                                                                                                                          
+//                     ````````````````    `````````````````````   ````````````````                                                                                                                                                                                                                           
+//                       ``````````````    `````````````````````   ``````````````                                                                                                                                                                                                                             
+//                           ``````````    ````````````````````    ``````````                                                                                                                                                                                                                                 
+//                             ````````     ``````````````````     ````````                                                                                                                                                                                                                                   
+//                                ````        ```````````````       ````                                                                                                                                                                                                                                      
+//                                              ```````````                                                                                                                                                                                                                                                   
+//                                                 ````                                                                                                                                                                                                                                                       
+//                                                                                                                                                                                                                                                                                                            
+//                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                            
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "./helper/ERC20Interface.sol";
-import "./interfaces/IWardenSwap.sol";
 import "./Partnership.sol";
 
-contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
+contract WardenSwap is Partnership, ReentrancyGuard {
     using SafeMath for uint256;
-    ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+
+    /**
+    * @dev when new trade occure (and success), this event will be boardcast.
+    * @param srcAsset Source token
+    * @param srcAmount amount of source token
+    * @param destAsset Destination token
+    * @param destAmount amount of destination token
+    * @param trader user address
+    */
+    event Trade(
+        address indexed srcAsset, // Source
+        uint256         srcAmount,
+        address indexed destAsset, // Destination
+        uint256         destAmount,
+        address indexed trader // User
+    );
 
     /**
     * @notice use token address 0xeee...eee for ether
@@ -225,21 +276,23 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
         }
         // Trade to route
         destAmount = _trade(tradingRouteIndex, src, srcAmount, dest);
+        destAmount = collectFee(partnerIndex, destAmount, dest);
+        console.log("destAmount", destAmount);
+
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
         if (etherERC20 == dest) {
             (bool success, ) = msg.sender.call.value(destAmount)(""); // Send back ether to sender
             require(success, "Transfer ether back to caller failed.");
+            console.log("contract balance 4: %s", address(this).balance);
         } else { // Send back token to sender
             // Some ERC20 Smart contract not return Bool, so we can't use require(dest.transfer(x, y)); here
             dest.transfer(msg.sender, destAmount);
+            console.log("contract balance 4: %s", dest.balanceOf(address(this)));
         }
 
-        // Collect fee
-        uint256 remainingAmount = collectFee(partnerIndex, destAmount, dest);
-
-        emit Trade(address(src), srcAmount, address(dest), remainingAmount, msg.sender);
-        return remainingAmount;
+        emit Trade(address(src), srcAmount, address(dest), destAmount, msg.sender);
+        return destAmount;
     }
 
     /**
@@ -324,6 +377,7 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
     function splitTrades(
         uint256[] calldata routes,
         ERC20     src,
+        uint256   totalSrcAmount,
         uint256[] calldata srcAmounts,
         ERC20     dest,
         uint256   minDestAmount,
@@ -340,7 +394,7 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
         uint256 destAmount = 0;
         // Prepare source's asset
         if (etherERC20 != src) {
-            src.transferFrom(msg.sender, address(this), srcAmount); // Transfer token to this address
+            src.transferFrom(msg.sender, address(this), totalSrcAmount); // Transfer token to this address
         }
         // Trade with routes
         for (uint i = 0; i < routes.length; i++) {
@@ -348,6 +402,10 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
             uint256 amount = srcAmounts[i];
             destAmount = destAmount.add(_trade(tradingRouteIndex, src, amount, dest));
         }
+
+        // Collect fee
+        destAmount = collectFee(partnerIndex, destAmount, dest);
+
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
         if (etherERC20 == dest) {
@@ -359,10 +417,10 @@ contract WardenSwap is IWardenSwap, Partnership, ReentrancyGuard {
         }
 
         // Collect fee
-        uint256 remainingAmount = collectFee(partnerIndex, destAmount, dest);
+        // uint256 remainingAmount = collectFee(partnerIndex, destAmount, dest);
 
-        emit Trade(address(src), srcAmount, address(dest), remainingAmount, msg.sender);
-        return remainingAmount;
+        emit Trade(address(src), srcAmount, address(dest), destAmount, msg.sender);
+        return destAmount;
     }
 
     /**
