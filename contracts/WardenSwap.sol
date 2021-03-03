@@ -390,7 +390,6 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     {
         require(routes.length > 0, "routes can not be empty");
         require(routes.length == srcAmounts.length, "routes and srcAmounts lengths mismatch");
-        uint256 srcAmount = srcAmounts[0];
         uint256 destAmount = 0;
         // Prepare source's asset
         if (etherERC20 != src) {
@@ -416,10 +415,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
             dest.transfer(msg.sender, destAmount);
         }
 
-        // Collect fee
-        // uint256 remainingAmount = collectFee(partnerIndex, destAmount, dest);
-
-        emit Trade(address(src), srcAmount, address(dest), destAmount, msg.sender);
+        emit Trade(address(src), totalSrcAmount, address(dest), destAmount, msg.sender);
         return destAmount;
     }
 

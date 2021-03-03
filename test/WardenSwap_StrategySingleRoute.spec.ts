@@ -234,7 +234,7 @@ describe('WardenSwap', () => {
 
       afterEach(async () => {
         expect(await dai.balanceOf(warden.address)).to.equal(0)
-        expect(await usdc.balanceOf(warden.address)).to.equal(0)
+        expect(await provider.getBalance(warden.address)).to.equal(0)
       })
 
       it('Should receive amount out properly', async () => {
