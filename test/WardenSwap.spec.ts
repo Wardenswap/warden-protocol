@@ -6,6 +6,7 @@ import WhaleAddresses from './helpers/whaleAddresses.json'
 import { main as Assets } from './helpers/assets'
 import { WardenSwap } from '../typechain/WardenSwap'
 import { IWardenTradingRoute } from '../typechain/IWardenTradingRoute'
+import { IERC20 } from '../typechain/IERC20'
 import '@openzeppelin/test-helpers'
 
 describe('WardenSwap', () => {
@@ -13,11 +14,11 @@ describe('WardenSwap', () => {
   let uniswapRoute: IWardenTradingRoute
   let sushiswapRoute: IWardenTradingRoute
   let curveRoute: IWardenTradingRoute
-  let dai: Contract
-  let usdc: Contract
-  let usdt: Contract
-  let susd: Contract
-  let mkr: Contract
+  let dai: IERC20
+  let usdc: IERC20
+  let usdt: IERC20
+  let susd: IERC20
+  let mkr: IERC20
 
   let trader1: Signer
   let trader2: Signer
@@ -44,11 +45,11 @@ describe('WardenSwap', () => {
     curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy() as IWardenTradingRoute
     await curveRoute.deployed()
 
-    dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address)
-    usdc = await ethers.getContractAt(ERC20Abi, Assets.USDC.address)
-    usdt = await ethers.getContractAt(ERC20Abi, Assets.USDT.address)
-    susd = await ethers.getContractAt(ERC20Abi, Assets.SUSD.address)
-    mkr = await ethers.getContractAt(ERC20Abi, Assets.MKR.address)
+    dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20
+    usdc = await ethers.getContractAt(ERC20Abi, Assets.USDC.address) as IERC20
+    usdt = await ethers.getContractAt(ERC20Abi, Assets.USDT.address) as IERC20
+    susd = await ethers.getContractAt(ERC20Abi, Assets.SUSD.address) as IERC20
+    mkr = await ethers.getContractAt(ERC20Abi, Assets.MKR.address) as IERC20
 
     trader1 = await ethers.provider.getSigner(WhaleAddresses.a16zAddress)
     trader2 = await ethers.provider.getSigner(WhaleAddresses.binance7)
@@ -299,6 +300,157 @@ describe('WardenSwap', () => {
         }
       ))
       .to.not.emit(warden, 'CollectFee')
+    })
+
+    describe('Should collect remaining Token / Ether', async () => {
+      it('Should collect remaining ether properly', async () => {
+        const etherAmount = utils.parseEther('3')
+  
+        // Send ether to contract
+        await wallet1.sendTransaction({
+          to: warden.address,
+          value: etherAmount
+        })
+        expect(await provider.getBalance(warden.address)).to.eq(etherAmount)
+  
+        // Collect
+        await expect(() =>  warden.collectRemainingEther(etherAmount))
+        .to.changeEtherBalance(wallet1, etherAmount)
+
+        expect(await provider.getBalance(warden.address)).to.eq('0')
+      })
+  
+      it('Should collect remaining token properly', async () => {
+        const tokenAmount = utils.parseUnits('1500', 18)
+  
+        await dai.connect(trader2).transfer(warden.address, tokenAmount)
+        expect(await dai.balanceOf(warden.address)).to.eq(tokenAmount)
+  
+        // Collect
+        await expect(() =>  warden.collectRemainingToken(dai.address, tokenAmount))
+        .to.changeTokenBalance(dai, wallet1, tokenAmount)
+
+        expect(await dai.balanceOf(warden.address)).to.eq('0')
+      })
+
+      it('Should not allow collect remaining ether if not owner', async function() {
+        const etherAmount = utils.parseEther('3')
+        await expect(warden.connect(wallet2).collectRemainingEther(etherAmount))
+        .to.revertedWith('caller is not the owner')
+      })
+
+      it('Should not allow collect remaining token if not owner', async function() {
+        const tokenAmount = utils.parseUnits('1500', 18)
+        await expect(warden.connect(wallet2).collectRemainingToken(dai.address, tokenAmount))
+        .to.revertedWith('caller is not the owner')
+      })
+    })
+
+    describe('Should trade fail when amountOut < minDestAmount', async () => {
+      it('When single route', async () => {
+        const amountIn = utils.parseEther('1')
+        const src = Assets.ETH.address
+        const dest = Assets.DAI.address
+
+        await expect(warden.trade(
+          uniswapIndex,
+          src,
+          amountIn,
+          dest,
+          utils.parseUnits('10000', 18),
+          partnerIndex,
+          {
+            value: amountIn
+          }
+        ))
+        .to.revertedWith('destination amount is too low')
+      })
+
+      it('When split trades', async () => {
+        const amountIns = [utils.parseEther('1'), utils.parseEther('1')]
+        const src = Assets.ETH.address
+        const dest = Assets.DAI.address
+
+        await expect(warden.splitTrades(
+          [uniswapIndex, sushiswapIndex],
+          src,
+          utils.parseEther('2'),
+          amountIns,
+          dest,
+          utils.parseUnits('10000', 18),
+          partnerIndex,
+          {
+            value: utils.parseEther('2')
+          }
+        ))
+        .to.revertedWith('destination amount is too low')
+      })
+    })
+
+    describe('Should fail when no routes provide for split trades', async () => {
+      const amountIns = [utils.parseEther('1'), utils.parseEther('1')]
+      const src = Assets.ETH.address
+      const dest = Assets.DAI.address
+
+      it('When get rate', async () => {
+        await expect(warden.getDestinationReturnAmountForSplitTrades(
+          [],
+          src,
+          amountIns,
+          dest,
+          partnerIndex
+        ))
+        .to.revertedWith('routes can not be empty')
+      })
+
+      it('When trading', async () => {
+        await expect(warden.splitTrades(
+          [],
+          src,
+          utils.parseEther('2'),
+          amountIns,
+          dest,
+          '1',
+          partnerIndex,
+          {
+            value: utils.parseEther('2')
+          }
+        ))
+        .to.revertedWith('routes can not be empty')
+      })
+    })
+
+    describe('Should fail when no routes.length != srcAmounts.length', async () => {
+      const amountIns = [utils.parseEther('1'), utils.parseEther('1')]
+      const src = Assets.ETH.address
+      const dest = Assets.DAI.address
+
+      it('When get rate', async () => {
+        await expect(warden.getDestinationReturnAmountForSplitTrades(
+          [uniswapIndex],
+          src,
+          amountIns,
+          dest,
+          partnerIndex
+        ))
+        .to.revertedWith('routes and srcAmounts lengths mismatch')
+      })
+
+      it('When trading', async () => {
+        await expect(warden.splitTrades(
+          [uniswapIndex],
+          src,
+          utils.parseEther('2'),
+          amountIns,
+          dest,
+          '1',
+          partnerIndex,
+          {
+            value: utils.parseEther('2')
+          }
+        ))
+        .to.revertedWith('routes and srcAmounts lengths mismatch')
+      })
     })
   })
 })
