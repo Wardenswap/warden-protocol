@@ -2,6 +2,7 @@
 pragma solidity 0.5.17;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./RoutingManagement.sol";
 import "hardhat/console.sol";
 
@@ -11,6 +12,7 @@ import "hardhat/console.sol";
 */
 contract Partnership is RoutingManagement {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     /**
     * @dev Platform Fee collection
@@ -21,7 +23,7 @@ contract Partnership is RoutingManagement {
     */
     event CollectFee(
       uint256 indexed partnerIndex,
-      ERC20   indexed token,
+      IERC20   indexed token,
       address indexed wallet,
       uint256         amount
     );
@@ -46,7 +48,7 @@ contract Partnership is RoutingManagement {
       bytes16 name;         // Partner reference
     }
 
-    ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     mapping(uint256 => Partner) public partners;
 
@@ -82,7 +84,7 @@ contract Partnership is RoutingManagement {
         return amount.sub(fee);
     }
 
-    function collectFee(uint256 partnerIndex, uint256 amount, ERC20 token)
+    function collectFee(uint256 partnerIndex, uint256 amount, IERC20 token)
         internal
         returns(uint256 remainingAmount)
     {
@@ -108,7 +110,7 @@ contract Partnership is RoutingManagement {
             console.log("contract balance 2: %s", address(this).balance);
         } else {
             console.log("contract balance 1: %s", token.balanceOf(address(this)));
-            token.transfer(partner.wallet, fee);
+            token.safeTransfer(partner.wallet, fee);
             console.log("contract balance 2: %s", token.balanceOf(address(this)));
         }
         emit CollectFee(partnerIndex, token, partner.wallet, fee);

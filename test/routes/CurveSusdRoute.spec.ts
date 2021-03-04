@@ -78,7 +78,7 @@ describe('CurveSusdTradingRoute', function() {
       Assets.USDC.address,
       amountIn
     ))
-    .to.revertedWith('Dai/insufficient-balance')
+    .to.revertedWith('SafeERC20: low-level call failed')
   })
 
   it('Should emit Trade event properly', async function () {

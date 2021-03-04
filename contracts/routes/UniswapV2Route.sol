@@ -2,20 +2,22 @@
 pragma solidity 0.5.17;
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 import "../interfaces/IUniswapV2Router.sol";
-import "../helper/ERC20Interface.sol";
 
 contract UniswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     IUniswapV2Router public constant router = IUniswapV2Router(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    ERC20 public constant etherERC20 = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    ERC20 public constant wETH = ERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public constant wETH = IERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     uint256 public constant amountOutMin = 1;
     uint256 public constant deadline = 2 ** 256 - 1;
 
     function trade(
-        ERC20 _src,
-        ERC20 _dest,
+        IERC20 _src,
+        IERC20 _dest,
         uint256 _srcAmount
     )
         public
@@ -37,8 +39,8 @@ contract UniswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
             );
             _destAmount = amounts[amounts.length - 1];
         } else if (_dest == etherERC20) { // TOKEN => ETH
-            _src.transferFrom(msg.sender, address(this), _srcAmount);
-            _src.approve(address(router), _srcAmount);
+            _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
+            _src.safeApprove(address(router), _srcAmount);
             address[] memory path = new address[](2);
             path[0] = address(_src);
             path[1] = address(wETH);
@@ -51,8 +53,8 @@ contract UniswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
             );
             _destAmount = amounts[amounts.length - 1];
         } else { // TOKEN => TOKEN
-            _src.transferFrom(msg.sender, address(this), _srcAmount);
-            _src.approve(address(router), _srcAmount);
+            _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
+            _src.safeApprove(address(router), _srcAmount);
             address[] memory path = new address[](2);
             path[0] = address(_src);
             path[1] = address(_dest);
@@ -69,8 +71,8 @@ contract UniswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
     }
 
     function getDestinationReturnAmount(
-        ERC20 _src,
-        ERC20 _dest,
+        IERC20 _src,
+        IERC20 _dest,
         uint256 _srcAmount
     )
         public

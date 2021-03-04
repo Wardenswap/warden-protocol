@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.5.17;
 
-import "../helper/ERC20Interface.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title Warden Trading Route
@@ -17,9 +17,9 @@ interface IWardenTradingRoute {
     * @return _destAmount: amount of actual destination tokens
     */
     event Trade(
-        ERC20 indexed _src,
+        IERC20 indexed _src,
         uint256 _srcAmount,
-        ERC20 indexed _dest,
+        IERC20 indexed _dest,
         uint256 _destAmount
     );
 
@@ -32,8 +32,8 @@ interface IWardenTradingRoute {
     * @return _destAmount: amount of actual destination tokens
     */
     function trade(
-        ERC20 _src,
-        ERC20 _dest,
+        IERC20 _src,
+        IERC20 _dest,
         uint256 _srcAmount
     )
         external
@@ -48,8 +48,8 @@ interface IWardenTradingRoute {
     * @return _destAmount: amount of expected destination tokens
     */
     function getDestinationReturnAmount(
-        ERC20 _src,
-        ERC20 _dest,
+        IERC20 _src,
+        IERC20 _dest,
         uint256 _srcAmount
     )
         external
@@ -64,8 +64,8 @@ interface IWardenTradingRoute {
     * @return _srcAmount: amount of expected source tokens
     */
     // function getSourceReturnAmount(
-    //     ERC20 _src,
-    //     ERC20 _dest,
+    //     IERC20 _src,
+    //     IERC20 _dest,
     //     uint256 _destAmount
     // )
     //     external

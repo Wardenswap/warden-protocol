@@ -69,11 +69,11 @@ pragma solidity 0.5.17;
                                                                                                                                                                                                                                                                                                             
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
-import "./helper/ERC20Interface.sol";
 import "./Partnership.sol";
 
 contract WardenSwap is Partnership, ReentrancyGuard {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     /**
     * @dev when new trade occure (and success), this event will be boardcast.
@@ -102,7 +102,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     function _tradeEtherToToken(
         uint256 tradingRouteIndex,
         uint256 srcAmount,
-        ERC20 dest
+        IERC20 dest
     )
         private
         returns(uint256)
@@ -131,7 +131,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     */
     function _tradeTokenToEther(
         uint256 tradingRouteIndex,
-        ERC20 src,
+        IERC20 src,
         uint256 srcAmount
     )
         private
@@ -140,7 +140,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         // Load trading route
         IWardenTradingRoute tradingRoute = tradingRoutes[tradingRouteIndex].route;
         // Approve to TradingRoute
-        src.approve(address(tradingRoute), srcAmount);
+        src.safeApprove(address(tradingRoute), srcAmount);
         // Trande to route
         uint256 destAmount = tradingRoute.trade(
             src,
@@ -160,9 +160,9 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     */
     function _tradeTokenToToken(
         uint256 tradingRouteIndex,
-        ERC20 src,
+        IERC20 src,
         uint256 srcAmount,
-        ERC20 dest
+        IERC20 dest
     )
         private
         returns(uint256)
@@ -170,7 +170,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         // Load trading route
         IWardenTradingRoute tradingRoute = tradingRoutes[tradingRouteIndex].route;
         // Approve to TradingRoute
-        src.approve(address(tradingRoute), srcAmount);
+        src.safeApprove(address(tradingRoute), srcAmount);
         // Trande to route
         uint256 destAmount = tradingRoute.trade(
             src,
@@ -195,9 +195,9 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     */
     function _trade(
         uint256             _tradingRouteIndex,
-        ERC20               _src,
+        IERC20              _src,
         uint256             _srcAmount,
-        ERC20               _dest
+        IERC20              _dest
     )
         private
         onlyTradingRouteEnabled(_tradingRouteIndex)
@@ -258,9 +258,9 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     */
     function trade(
         uint256   tradingRouteIndex,
-        ERC20     src,
+        IERC20    src,
         uint256   srcAmount,
-        ERC20     dest,
+        IERC20    dest,
         uint256   minDestAmount,
         uint256   partnerIndex
     )
@@ -272,7 +272,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         uint256 destAmount;
         // Prepare source's asset
         if (etherERC20 != src) {
-            src.transferFrom(msg.sender, address(this), srcAmount); // Transfer token to this address
+            src.safeTransferFrom(msg.sender, address(this), srcAmount); // Transfer token to this address
         }
         // Trade to route
         destAmount = _trade(tradingRouteIndex, src, srcAmount, dest);
@@ -286,8 +286,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
             require(success, "Transfer ether back to caller failed.");
             console.log("contract balance 4: %s", address(this).balance);
         } else { // Send back token to sender
-            // Some ERC20 Smart contract not return Bool, so we can't use require(dest.transfer(x, y)); here
-            dest.transfer(msg.sender, destAmount);
+            dest.safeTransfer(msg.sender, destAmount);
             console.log("contract balance 4: %s", dest.balanceOf(address(this)));
         }
 
@@ -308,10 +307,10 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     */
     function splitTrades(
         uint256[] calldata routes,
-        ERC20     src,
+        IERC20    src,
         uint256   totalSrcAmount,
         uint256[] calldata srcAmounts,
-        ERC20     dest,
+        IERC20    dest,
         uint256   minDestAmount,
         uint256   partnerIndex
     )
@@ -325,7 +324,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         uint256 destAmount = 0;
         // Prepare source's asset
         if (etherERC20 != src) {
-            src.transferFrom(msg.sender, address(this), totalSrcAmount); // Transfer token to this address
+            src.safeTransferFrom(msg.sender, address(this), totalSrcAmount); // Transfer token to this address
         }
         // Trade with routes
         for (uint i = 0; i < routes.length; i++) {
@@ -343,8 +342,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
             (bool success, ) = msg.sender.call.value(destAmount)(""); // Send back ether to sender
             require(success, "Transfer ether back to caller failed.");
         } else { // Send back token to sender
-            // Some ERC20 Smart contract not return Bool, so we can't use require(dest.transfer(x, y)); here
-            dest.transfer(msg.sender, destAmount);
+            dest.safeTransfer(msg.sender, destAmount);
         }
 
         emit Trade(address(src), totalSrcAmount, address(dest), destAmount, msg.sender);
@@ -362,8 +360,8 @@ contract WardenSwap is Partnership, ReentrancyGuard {
     */
     function getDestinationReturnAmount(
         uint256 tradingRouteIndex,
-        ERC20   src,
-        ERC20   dest,
+        IERC20  src,
+        IERC20  dest,
         uint256 srcAmount,
         uint256 partnerIndex
     )
@@ -379,9 +377,9 @@ contract WardenSwap is Partnership, ReentrancyGuard {
 
     function getDestinationReturnAmountForSplitTrades(
         uint256[] calldata routes,
-        ERC20     src,
+        IERC20    src,
         uint256[] calldata srcAmounts,
-        ERC20     dest,
+        IERC20    dest,
         uint256   partnerIndex
     )
         external
@@ -404,13 +402,13 @@ contract WardenSwap is Partnership, ReentrancyGuard {
 
     // In case of expected and unexpected event that have some token amounts remain in this contract, owner can call to collect them.
     function collectRemainingToken(
-        ERC20 token,
+        IERC20  token,
         uint256 amount
     )
       public
       onlyOwner
     {
-        token.transfer(msg.sender, amount);
+        token.safeTransfer(msg.sender, amount);
     }
 
     // In case of expected and unexpected event that have some ether amounts remain in this contract, owner can call to collect them.

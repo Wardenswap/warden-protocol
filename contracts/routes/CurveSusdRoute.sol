@@ -2,8 +2,8 @@
 pragma solidity 0.5.17;
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../interfaces/IWardenTradingRoute.sol";
-import "../helper/ERC20Interface.sol";
 
 interface ICurve {
     // def get_dy(i: int128, j: int128, dx: uint256) -> uint256:
@@ -16,15 +16,17 @@ interface ICurve {
 }
 
 contract CurveSusdTradingRoute is IWardenTradingRoute, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     ICurve public constant susdPool = ICurve(0xA5407eAE9Ba41422680e2e00537571bcC53efBfD);
-    ERC20 public constant dai = ERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    ERC20 public constant usdc = ERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    ERC20 public constant usdt = ERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
-    ERC20 public constant susd = ERC20(0x57Ab1ec28D129707052df4dF418D58a2D46d5f51);
+    IERC20 public constant dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    IERC20 public constant usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    IERC20 public constant usdt = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+    IERC20 public constant susd = IERC20(0x57Ab1ec28D129707052df4dF418D58a2D46d5f51);
 
     function trade(
-        ERC20 _src,
-        ERC20 _dest,
+        IERC20 _src,
+        IERC20 _dest,
         uint256 _srcAmount
     )
         public
@@ -47,18 +49,18 @@ contract CurveSusdTradingRoute is IWardenTradingRoute, ReentrancyGuard {
         require(i != -1 && j != -1, "tokens're not supported!");
 
         uint256 balanceBefore = _dest.balanceOf(address(this));
-        _src.transferFrom(msg.sender, address(this), _srcAmount);
-        _src.approve(address(susdPool), _srcAmount);
+        _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
+        _src.safeApprove(address(susdPool), _srcAmount);
         susdPool.exchange_underlying(i, j, _srcAmount, 0);
         uint256 balanceAfter = _dest.balanceOf(address(this));
         _destAmount = balanceAfter - balanceBefore;
-        _dest.transfer(msg.sender, _destAmount);
+        _dest.safeTransfer(msg.sender, _destAmount);
         emit Trade(_src, _srcAmount, _dest, _destAmount);
     }
 
     function getDestinationReturnAmount(
-        ERC20 _src,
-        ERC20 _dest,
+        IERC20 _src,
+        IERC20 _dest,
         uint256 _srcAmount
     )
         public
