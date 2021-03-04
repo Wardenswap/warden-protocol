@@ -276,7 +276,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         }
         // Trade to route
         destAmount = _trade(tradingRouteIndex, src, srcAmount, dest);
-        destAmount = collectFee(partnerIndex, destAmount, dest);
+        destAmount = _collectFee(partnerIndex, destAmount, dest);
         console.log("destAmount", destAmount);
 
         // Throw exception if destination amount doesn't meet user requirement.
@@ -334,7 +334,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         }
 
         // Collect fee
-        destAmount = collectFee(partnerIndex, destAmount, dest);
+        destAmount = _collectFee(partnerIndex, destAmount, dest);
 
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
@@ -372,7 +372,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         // Load trading route
         IWardenTradingRoute tradingRoute = tradingRoutes[tradingRouteIndex].route;
         uint256 destAmount = tradingRoute.getDestinationReturnAmount(src, dest, srcAmount);
-        return amountWithFee(destAmount, partnerIndex);
+        return _amountWithFee(destAmount, partnerIndex);
     }
 
     function getDestinationReturnAmountForSplitTrades(
@@ -397,7 +397,7 @@ contract WardenSwap is Partnership, ReentrancyGuard {
             IWardenTradingRoute tradingRoute = tradingRoutes[tradingRouteIndex].route;
             destAmount = destAmount.add(tradingRoute.getDestinationReturnAmount(src, dest, amount));
         }
-        return amountWithFee(destAmount, partnerIndex);
+        return _amountWithFee(destAmount, partnerIndex);
     }
 
     // In case of expected and unexpected event that have some token amounts remain in this contract, owner can call to collect them.

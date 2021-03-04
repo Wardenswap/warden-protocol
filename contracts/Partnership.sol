@@ -68,7 +68,7 @@ contract Partnership is RoutingManagement {
         emit UpdatePartner(index, wallet, fee, name);
     }
 
-    function amountWithFee(uint256 amount, uint256 partnerIndex)
+    function _amountWithFee(uint256 amount, uint256 partnerIndex)
         internal
         view
         returns(uint256 remainingAmount)
@@ -84,7 +84,7 @@ contract Partnership is RoutingManagement {
         return amount.sub(fee);
     }
 
-    function collectFee(uint256 partnerIndex, uint256 amount, IERC20 token)
+    function _collectFee(uint256 partnerIndex, uint256 amount, IERC20 token)
         internal
         returns(uint256 remainingAmount)
     {
