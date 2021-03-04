@@ -71,7 +71,35 @@ pragma solidity 0.5.17;
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "./Partnership.sol";
 
-contract WardenSwap is Partnership, ReentrancyGuard {
+contract WardenTokenPriviledge is Partnership {
+    uint256 public constant eligibleAmount = 10 ether; // 10 WAD
+    IERC20 public wardenToken;
+
+    event UpdateWardenToken(IERC20 indexed token);
+
+    function updateWardenToken(
+        IERC20  token
+    )
+        public
+        onlyOwner
+    {
+        wardenToken = token;
+        emit UpdateWardenToken(token);
+    }
+
+    function isEligibleForFreeTrade(address user)
+        public
+        view
+        returns (bool)
+    {
+        if (address(wardenToken) == 0x0000000000000000000000000000000000000000) {
+            return false;
+        }
+        return wardenToken.balanceOf(user) >= eligibleAmount;
+    }
+}
+
+contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -276,7 +304,9 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         }
         // Trade to route
         destAmount = _trade(tradingRouteIndex, src, srcAmount, dest);
-        destAmount = _collectFee(partnerIndex, destAmount, dest);
+        if (!isEligibleForFreeTrade(msg.sender)) {
+            destAmount = _collectFee(partnerIndex, destAmount, dest);
+        }
         console.log("destAmount", destAmount);
 
         // Throw exception if destination amount doesn't meet user requirement.
@@ -334,7 +364,9 @@ contract WardenSwap is Partnership, ReentrancyGuard {
         }
 
         // Collect fee
-        destAmount = _collectFee(partnerIndex, destAmount, dest);
+        if (!isEligibleForFreeTrade(msg.sender)) {
+            destAmount = _collectFee(partnerIndex, destAmount, dest);
+        }
 
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
