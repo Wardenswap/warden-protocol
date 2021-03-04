@@ -94,7 +94,8 @@ contract Partnership is RoutingManagement {
         console.log("partner wallet: %s", partner.wallet);
         console.log("token", address(token));
         if (partner.wallet == 0x0000000000000000000000000000000000000000) {
-          partner = partners[0];
+            partnerIndex = 0;
+            partner = partners[0];
         }
         if (partner.fee == 0) {
             return amount;

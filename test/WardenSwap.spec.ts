@@ -266,7 +266,7 @@ describe('WardenSwap', () => {
         }
       ))
       .to.emit(warden, 'CollectFee')
-      .withArgs(randomPartnerIndex, dest, reserve.address, expectedFee)
+      .withArgs(0, dest, reserve.address, expectedFee) // expect to use partner index 0
       .to.emit(dai, 'Transfer')
       .withArgs(warden.address, reserve.address, expectedFee)
     })
