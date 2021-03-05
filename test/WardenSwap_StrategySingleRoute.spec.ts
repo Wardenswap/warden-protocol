@@ -96,6 +96,10 @@ describe('WardenSwap: Single route strategy', () => {
       // Curve
       await warden.addTradingRoute('Curve', curveRoute.address)
       curveIndex = 2
+
+      await uniswapRoute.addWhitelisted(warden.address)
+      await sushiswapRoute.addWhitelisted(warden.address)
+      await curveRoute.addWhitelisted(warden.address)
     })
 
     describe('Should get rates properly', async () => {

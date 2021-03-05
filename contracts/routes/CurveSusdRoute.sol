@@ -3,6 +3,7 @@ pragma solidity 0.5.17;
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 
 interface ICurve {
@@ -15,7 +16,7 @@ interface ICurve {
     function exchange_underlying(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
 }
 
-contract CurveSusdTradingRoute is IWardenTradingRoute, ReentrancyGuard {
+contract CurveSusdTradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     ICurve public constant susdPool = ICurve(0xA5407eAE9Ba41422680e2e00537571bcC53efBfD);
@@ -31,6 +32,7 @@ contract CurveSusdTradingRoute is IWardenTradingRoute, ReentrancyGuard {
     )
         public
         payable
+        onlyWhitelisted
         nonReentrant
         returns(uint256 _destAmount)
     {

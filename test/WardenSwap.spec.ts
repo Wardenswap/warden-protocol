@@ -101,6 +101,10 @@ describe('WardenSwap', () => {
       // Curve
       await warden.addTradingRoute('Curve', curveRoute.address)
       curveIndex = 2
+
+      await uniswapRoute.addWhitelisted(warden.address)
+      await sushiswapRoute.addWhitelisted(warden.address)
+      await curveRoute.addWhitelisted(warden.address)
     })
 
     describe('fee = 0.1%', async() => {

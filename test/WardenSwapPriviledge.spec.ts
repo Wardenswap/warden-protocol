@@ -65,6 +65,8 @@ describe('WardenSwap', () => {
       // Uniswap
       await warden.addTradingRoute('Uniswap', uniswapRoute.address)
       uniswapIndex = 0
+
+      await uniswapRoute.addWhitelisted(warden.address)
     })
 
     it('Should emit event when update Warden token properly', async () => {

@@ -3,10 +3,11 @@ pragma solidity 0.5.17;
 
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 import "../interfaces/IUniswapV2Router.sol";
 
-contract SushiswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
+contract SushiswapV2TradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IUniswapV2Router public constant router = IUniswapV2Router(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
@@ -22,6 +23,7 @@ contract SushiswapV2TradingRoute is IWardenTradingRoute, ReentrancyGuard {
     )
         public
         payable
+        onlyWhitelisted
         nonReentrant
         returns(uint256 _destAmount)
     {
