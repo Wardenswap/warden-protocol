@@ -78,7 +78,7 @@ describe('WardenSwap', () => {
       .withArgs(wardenToken.address)
     })
 
-    it('Shuld not allow to update warnden token if not owner', async () => {
+    it('Should not allow to update warnden token if not owner', async () => {
       const wardenToken = await (await ethers.getContractFactory('MockToken')).deploy() as MockToken
       await wardenToken.deployed()
 
