@@ -35,33 +35,17 @@ contract WardenBestRateQuery {
     view
     returns (uint256 routeIndex, uint256 amountOut) {
         for (uint256 i = 0; i < routes.length; i++) {
-            // console.log("route", routes[i]);
+            // fail-safe getting rate
+            // uint256 _amountOut = warden.getDestinationReturnAmount(routes[i], src, dest, srcAmount, partnerIndex);
             bytes memory payload = abi.encodeWithSignature("getDestinationReturnAmount(uint256,address,address,uint256,uint256)", routes[i], src, dest, srcAmount, partnerIndex);
             (bool success, bytes memory data) = address(warden).staticcall(payload);
-
-            // console.log("success");
-            // console.log(success);
-            // console.log(data.length);
-
             if (success) {
                 uint256 _amountOut = abi.decode(data, (uint256));
-                // console.log("_amountOut", _amountOut);
                 if (_amountOut > amountOut) {
                     amountOut = _amountOut;
                     routeIndex = routes[i];
                 }
             }
-            // console.log("data");
-            // console.log(data);
-            // require(success, "abcd");
-            // uint256 _amountOut = abi.decode(data, (uint256));
-            // console.log("route", routes[i]);
-
-            // uint256 _amountOut = warden.getDestinationReturnAmount(routes[i], src, dest, srcAmount, partnerIndex);
-            // if (_amountOut > amountOut) {
-            //     amountOut = _amountOut;
-            //     routeIndex = routes[i];
-            // }
         }
     }
 }
