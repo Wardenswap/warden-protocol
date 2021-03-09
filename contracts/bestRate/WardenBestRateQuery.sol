@@ -18,8 +18,9 @@ interface IWarden {
 }
 
 contract WardenBestRateQuery {
-    IWarden public warden;
     uint256 public constant partnerIndex = 0;
+
+    IWarden public warden;
 
     constructor(IWarden _warden) public {
         warden = _warden;
@@ -38,7 +39,7 @@ contract WardenBestRateQuery {
     ) {
         // fail-safe getting rate, equal to
         // uint256 _amountOut = warden.getDestinationReturnAmount(routes[i], src, dest, srcAmount, partnerIndex);
-        bytes memory payload = abi.encodeWithSignature("getDestinationReturnAmount(uint256,address,address,uint256,uint256)", route, src, dest, srcAmount, partnerIndex);
+        bytes memory payload = abi.encodeWithSelector(warden.getDestinationReturnAmount.selector, route, src, dest, srcAmount, partnerIndex);
         (bool success, bytes memory data) = address(warden).staticcall(payload);
         if (success) {
             return abi.decode(data, (uint256));
