@@ -11,10 +11,7 @@ import { IERC20 } from '../../typechain/IERC20'
 import { IUniswapV2Router } from '../../typechain/IUniswapV2Router'
 import { abi as UniswapV2RouterAbi } from '../../artifacts/contracts/interfaces/IUniswapV2Router.sol/IUniswapV2Router.json'
 import '@openzeppelin/test-helpers'
-
-const UNISWAP_ROUTER_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-const SUSHISWAP_ROUTER_ADDRESS = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
-const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+import { UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
 
 describe('UniswapV2PoolEthPoolRoute', () => {
   let route: UniswapV2PoolEthPoolTradingRoute

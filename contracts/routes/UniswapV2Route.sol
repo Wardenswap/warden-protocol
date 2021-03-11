@@ -10,11 +10,19 @@ import "../interfaces/IUniswapV2Router.sol";
 contract UniswapV2TradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    IUniswapV2Router public constant router = IUniswapV2Router(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    IUniswapV2Router public router;
     IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    IERC20 public constant wETH = IERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    IERC20 public wETH;
     uint256 public constant amountOutMin = 1;
     uint256 public constant deadline = 2 ** 256 - 1;
+
+    constructor(
+        IUniswapV2Router _router,
+        IERC20 _wETH
+    ) public {
+        router = _router;
+        wETH = _wETH;
+    }
 
     function trade(
         IERC20 _src,

@@ -6,6 +6,7 @@ import { expect } from 'chai'
 import ERC20Abi from './helpers/erc20Abi.json'
 import WhaleAddresses from './helpers/whaleAddresses.json'
 import { main as Assets } from './helpers/assets'
+import { UNISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from './constants'
 
 describe('RoutingManagement', function() {
   const provider = waffle.provider
@@ -15,7 +16,10 @@ describe('RoutingManagement', function() {
     this.manager = await (await ethers.getContractFactory('RoutingManagement')).deploy()
     await this.manager.deployed()
 
-    this.uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy()
+    this.uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy(
+      UNISWAP_ROUTER_ADDRESS,
+      WETH_ADDRESS
+    )
     await this.uniswapRoute.deployed()
 
     this.sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy()

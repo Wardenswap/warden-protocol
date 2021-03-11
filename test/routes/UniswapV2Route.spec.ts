@@ -10,6 +10,8 @@ import { UniswapV2TradingRoute } from '../../typechain/UniswapV2TradingRoute'
 import { IERC20 } from '../../typechain/IERC20'
 import '@openzeppelin/test-helpers'
 
+import { UNISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
+
 describe('UniswapV2TradingRoute', () => {
   let route: UniswapV2TradingRoute
   let dai: IERC20
@@ -27,7 +29,10 @@ describe('UniswapV2TradingRoute', () => {
 
   beforeEach(async () => {
     const Route = await ethers.getContractFactory('UniswapV2TradingRoute')
-    route = await Route.deploy() as UniswapV2TradingRoute
+    route = await Route.deploy(
+      UNISWAP_ROUTER_ADDRESS,
+      WETH_ADDRESS
+    ) as UniswapV2TradingRoute
     await route.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20

@@ -9,7 +9,8 @@ import { WardenBestRateQuery } from '../../typechain/WardenBestRateQuery'
 import { IWardenTradingRoute } from '../../typechain/IWardenTradingRoute'
 import { IERC20 } from '../../typechain/IERC20'
 import '@openzeppelin/test-helpers'
-1
+import { UNISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
+
 describe('WardenSwap', () => {
   let warden: WardenSwap
   let uniswapRoute: IWardenTradingRoute
@@ -42,7 +43,10 @@ describe('WardenSwap', () => {
     wardenBestRateQuery = await (await ethers.getContractFactory('WardenBestRateQuery')).deploy(warden.address) as WardenBestRateQuery
     await wardenBestRateQuery.deployed()
 
-    uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy() as IWardenTradingRoute
+    uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy(
+      UNISWAP_ROUTER_ADDRESS,
+      WETH_ADDRESS
+    ) as IWardenTradingRoute
     await uniswapRoute.deployed()
 
     sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy() as IWardenTradingRoute
