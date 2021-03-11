@@ -6,6 +6,10 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
+    "flatten_wardenswap":  "npx hardhat flatten contracts/WardenSwap.sol > flatten/WardenSwap.sol",
+    "flatten_route-uniswap":  "npx hardhat flatten contracts/routes/UniswapV2Route.sol > flatten/UniswapV2Route.sol",
+    "flatten_route-uniswap2":  "npx hardhat flatten contracts/routes/UniswapV2TokenEthTokenRoute.sol > flatten/UniswapV2TokenEthTokenRoute.sol",
+    "flatten_bestrate":  "npx hardhat flatten contracts/bestRate/WardenBestRateQuery.sol > flatten/WardenBestRateQuery.sol",
     "test": "TS_NODE_TRANSPILE_ONLY=1 npx hardhat test",
     "test:coverage": "NODE_OPTIONS=\"--max-old-space-size=2048\" hardhat coverage"
   },
