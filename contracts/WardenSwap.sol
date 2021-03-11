@@ -318,17 +318,14 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
         if (!isEligibleForFreeTrade(msg.sender)) {
             destAmount = _collectFee(partnerIndex, destAmount, dest);
         }
-        console.log("destAmount", destAmount);
 
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
         if (etherERC20 == dest) {
             (bool success, ) = msg.sender.call.value(destAmount)(""); // Send back ether to sender
             require(success, "Transfer ether back to caller failed.");
-            console.log("contract balance 4: %s", address(this).balance);
         } else { // Send back token to sender
             dest.safeTransfer(msg.sender, destAmount);
-            console.log("contract balance 4: %s", dest.balanceOf(address(this)));
         }
 
         emit Trade(address(src), srcAmount, address(dest), destAmount, msg.sender);
