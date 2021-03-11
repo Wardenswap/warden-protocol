@@ -107,9 +107,9 @@ describe('WardenSwap: Split trades strategy', () => {
         const amountIns = [utils.parseEther('2'), utils.parseEther('3')]
         const src = Assets.ETH.address
         const dest = Assets.DAI.address
-        const expectedAmountOut1 = '2708.764504945937131436'
-        const expectedAmountOut2 = '4065.286467051489162512'
-        const expectedAmountOut = '6774.050971997426293948'
+        const expectedAmountOut1 = '2708.790413059729615645'
+        const expectedAmountOut2 = '4041.679567422106905198'
+        const expectedAmountOut = '6750.469980481836520842'
   
         const amountOut = await warden.getDestinationReturnAmountForSplitTrades(
           [uniswapIndex, sushiswapIndex],
@@ -130,9 +130,9 @@ describe('WardenSwap: Split trades strategy', () => {
         const amountIns = [utils.parseUnits('1500', 18), utils.parseUnits('3500', 18)]
         const src = Assets.DAI.address
         const dest = Assets.ETH.address
-        const expectedAmountOut1 = '1.09860905892368178'
-        const expectedAmountOut2 = '2.562082755257136736'
-        const expectedAmountOut = '3.660691814180818516'
+        const expectedAmountOut1 = '1.09859855122396091'
+        const expectedAmountOut2 = '2.57704756638548698'
+        const expectedAmountOut = '3.67564611760944789'
   
         const amountOut = await warden.getDestinationReturnAmountForSplitTrades(
           [uniswapIndex, sushiswapIndex],
@@ -178,8 +178,8 @@ describe('WardenSwap: Split trades strategy', () => {
       const totalAmountIn = utils.parseEther('8')
       const src = Assets.ETH.address
       const dest = Assets.DAI.address
-      const expectedAmountOut = '10838392246196753680136'
-      const minDestAmount = utils.parseUnits('10830', 18)
+      const expectedAmountOut = '10799087555118673630764'
+      const minDestAmount = utils.parseUnits('10790', 18)
 
       afterEach(async () => {
         expect(await provider.getBalance(warden.address)).to.equal(0)
@@ -267,8 +267,8 @@ describe('WardenSwap: Split trades strategy', () => {
       const totalAmountIn = utils.parseEther('4400')
       const src = Assets.DAI.address
       const dest = Assets.ETH.address
-      const expectedAmountOut = BigNumber.from('3222467688480288521')
-      const expectedFee = BigNumber.from('3225693381862150')
+      const expectedAmountOut = BigNumber.from('3236143668644293065')
+      const expectedFee = BigNumber.from('3239383051695989')
       const minDestAmount = utils.parseUnits('3.20', 18)
 
       beforeEach(async () => {

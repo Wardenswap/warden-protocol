@@ -107,7 +107,7 @@ describe('WardenSwap: Single route strategy', () => {
         const amountIn = utils.parseEther('1')
         const src = Assets.ETH.address
         const dest = Assets.DAI.address
-        const expectedAmountOut = '1354.143199959701156686'
+        const expectedAmountOut = '1354.156154766128919252'
         const amountOut = await warden.getDestinationReturnAmount(uniswapIndex, src, dest, amountIn, 0)
         expect(utils.formatUnits(amountOut, 18))
         .to.equal(expectedAmountOut)
@@ -117,7 +117,7 @@ describe('WardenSwap: Single route strategy', () => {
         const amountIn = utils.parseUnits('1500', 18)
         const src = Assets.DAI.address
         const dest = Assets.ETH.address
-        const expectedAmountOut = '1.098825930140218641'
+        const expectedAmountOut = '1.09881541801256819'
         const amountOut = await warden.getDestinationReturnAmount(uniswapIndex, src, dest, amountIn, 0)
         expect(utils.formatEther(amountOut))
         .to.equal(expectedAmountOut)
@@ -139,7 +139,7 @@ describe('WardenSwap: Single route strategy', () => {
       const src = Assets.ETH.address
       const dest = Assets.DAI.address
       
-      const expectedAmountOut = BigNumber.from('1354143199959701156686')
+      const expectedAmountOut = BigNumber.from('1354156154766128919252')
       const minDestAmount = utils.parseUnits('1350', 18)
 
       afterEach(async () => {
@@ -214,8 +214,8 @@ describe('WardenSwap: Single route strategy', () => {
       const src = Assets.DAI.address
       const dest = Assets.ETH.address
       
-      const expectedAmountOut = BigNumber.from('2564169945400464667')
-      const expectedFee = BigNumber.from('2566736682082547')
+      const expectedAmountOut = BigNumber.from('2564145416696050673')
+      const expectedFee = BigNumber.from('2566712128824875')
       const minDestAmount = utils.parseUnits('2.50', 18)
 
       beforeEach(async () => {
