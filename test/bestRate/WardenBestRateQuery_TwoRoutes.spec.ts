@@ -222,19 +222,19 @@ describe('WardenSwap', () => {
 
       const amountIn1 = amountIn.mul(twoRouteOutput.volumns[0]).div(100)
       const amountIn2 = amountIn.sub(amountIn1)
-      await expect(() => warden.splitTrades(
-        [uniswapIndex, sushiswapIndex],
-        src.address,
-        amountIn,
-        [amountIn1, amountIn2],
-        dest.address,
-        '1',
-        partnerIndex,
-        {
-          value: amountIn
-        }
-      ))
-      .to.changeTokenBalance(dai, wallet1, twoRouteOutput.amountOut)
+      // await expect(() => warden.splitTrades(
+      //   [uniswapIndex, sushiswapIndex],
+      //   src.address,
+      //   amountIn,
+      //   [amountIn1, amountIn2],
+      //   dest.address,
+      //   '1',
+      //   partnerIndex,
+      //   {
+      //     value: amountIn
+      //   }
+      // ))
+      // .to.changeTokenBalance(dai, wallet1, twoRouteOutput.amountOut)
 
       // ==================== One Route ====================
       // routeIndex 1

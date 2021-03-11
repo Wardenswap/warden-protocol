@@ -72,10 +72,11 @@ import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "./Partnership.sol";
 
 contract WardenTokenPriviledge is Partnership {
-    uint256 public constant eligibleAmount = 10 ether; // 10 WAD
+    uint256 public eligibleAmount = 10 ether; // 10 WAD
     IERC20 public wardenToken;
 
     event UpdateWardenToken(IERC20 indexed token);
+    event UpdateEligibleAmount(uint256 amount);
 
     function updateWardenToken(
         IERC20  token
@@ -85,6 +86,16 @@ contract WardenTokenPriviledge is Partnership {
     {
         wardenToken = token;
         emit UpdateWardenToken(token);
+    }
+
+    function updateEligibleAmount(
+        uint256  amount
+    )
+        public
+        onlyOwner
+    {
+        eligibleAmount = amount;
+        emit UpdateEligibleAmount(amount);
     }
 
     function isEligibleForFreeTrade(address user)

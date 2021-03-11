@@ -10,7 +10,7 @@ import { IERC20 } from '../typechain/IERC20'
 import { MockToken } from '../typechain/MockToken'
 import '@openzeppelin/test-helpers'
 
-describe('WardenSwap', () => {
+describe('WardenSwap Priviledge', () => {
   let warden: WardenSwap
   let uniswapRoute: IWardenTradingRoute
   let sushiswapRoute: IWardenTradingRoute
@@ -189,6 +189,88 @@ describe('WardenSwap', () => {
         .withArgs(partnerIndex, dest, reserve.address, expectedFee)
 
         expect(await warden.isEligibleForFreeTrade(wallet1.address)).to.be.false
+      })
+
+      it('Should update eligibleAmount by owner', async() => {
+        const newAmount = utils.parseUnits('120', 18)
+
+        await expect(await warden.updateEligibleAmount(newAmount))
+        .to.emit(warden, 'UpdateEligibleAmount')
+        .withArgs(newAmount)
+        expect(await warden.eligibleAmount()).to.equal(newAmount)
+      })
+
+      it('Should not allow to update eligibleAmount if not owner', async() => {
+        const newAmount = utils.parseUnits('120', 18)
+  
+        await expect(warden.connect(wallet2).updateEligibleAmount(newAmount))
+        .to.revertedWith('Ownable: caller is not the owner')
+        expect(await warden.eligibleAmount()).to.equal(utils.parseUnits('10', 18))
+      })
+
+      describe('Update eligibleAmount to 100', async() => {
+        beforeEach(async() => {
+          const newAmount = utils.parseUnits('100', 18)
+          await warden.updateEligibleAmount(newAmount)
+        })
+
+        it('Should trade with fee when WAD > 10 && WAD < 100', async() => {
+          await wardenToken.mint(wallet1.address, utils.parseUnits('60', 18))
+          expect(await wardenToken.balanceOf(wallet1.address))
+          .to.be.equal(utils.parseUnits('60', 18))
+    
+          const uniswapAmountOut = await uniswapRoute.getDestinationReturnAmount(src, dest, amountIn)
+          const expectedAmountOut = await warden.getDestinationReturnAmount(uniswapIndex, src, dest, amountIn, partnerIndex)
+          const expectedFee = uniswapAmountOut.sub(expectedAmountOut)
+    
+          await expect(await warden.trade(
+            uniswapIndex,
+            src,
+            amountIn,
+            dest,
+            '1',
+            partnerIndex,
+            {
+              value: amountIn
+            }
+          ))
+          .to.emit(warden, 'Trade')
+          .withArgs(src, amountIn, dest, expectedAmountOut, wallet1.address)
+          .to.emit(uniswapRoute, 'Trade')
+          .withArgs(src, amountIn, dest, uniswapAmountOut)
+          .to.emit(warden, 'CollectFee')
+          .withArgs(partnerIndex, dest, reserve.address, expectedFee)
+  
+          expect(await warden.isEligibleForFreeTrade(wallet1.address)).to.be.false
+        })
+
+        it('Should trade without fee if have WAD = 100', async() => {
+          await wardenToken.mint(wallet1.address, utils.parseUnits('100', 18))
+          expect(await wardenToken.balanceOf(wallet1.address))
+          .to.be.equal(utils.parseUnits('100', 18))
+    
+          const uniswapAmountOut = await uniswapRoute.getDestinationReturnAmount(src, dest, amountIn)
+          const expectedAmountOut = await warden.getDestinationReturnAmount(uniswapIndex, src, dest, amountIn, partnerIndex)
+    
+          await expect(await warden.trade(
+            uniswapIndex,
+            src,
+            amountIn,
+            dest,
+            '1',
+            partnerIndex,
+            {
+              value: amountIn
+            }
+          ))
+          .to.emit(warden, 'Trade')
+          .withArgs(src, amountIn, dest, uniswapAmountOut, wallet1.address)
+          .to.emit(uniswapRoute, 'Trade')
+          .withArgs(src, amountIn, dest, uniswapAmountOut)
+          .to.not.emit(warden, 'CollectFee')
+  
+          expect(await warden.isEligibleForFreeTrade(wallet1.address)).to.be.true
+        })
       })
     })
 
