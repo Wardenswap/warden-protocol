@@ -55,7 +55,10 @@ describe('WardenSwap', () => {
     curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy() as IWardenTradingRoute
     await curveRoute.deployed()
 
-    uniswapTokenEthTokenRoute = await (await ethers.getContractFactory('UniswapV2TokenEthTokenTradingRoute')).deploy() as IWardenTradingRoute
+    uniswapTokenEthTokenRoute = await (await ethers.getContractFactory('UniswapV2TokenEthTokenTradingRoute')).deploy(
+      UNISWAP_ROUTER_ADDRESS,
+      WETH_ADDRESS
+    ) as IWardenTradingRoute
     await curveRoute.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20

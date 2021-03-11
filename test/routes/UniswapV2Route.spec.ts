@@ -9,7 +9,6 @@ import { main as Assets } from '../helpers/assets'
 import { UniswapV2TradingRoute } from '../../typechain/UniswapV2TradingRoute'
 import { IERC20 } from '../../typechain/IERC20'
 import '@openzeppelin/test-helpers'
-
 import { UNISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
 
 describe('UniswapV2TradingRoute', () => {
