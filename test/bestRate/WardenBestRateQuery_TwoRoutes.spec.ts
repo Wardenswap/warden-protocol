@@ -9,7 +9,7 @@ import { WardenBestRateQuery } from '../../typechain/WardenBestRateQuery'
 import { IWardenTradingRoute } from '../../typechain/IWardenTradingRoute'
 import { IERC20 } from '../../typechain/IERC20'
 import '@openzeppelin/test-helpers'
-import { UNISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
+import { UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
 
 describe('WardenSwap', () => {
   let warden: WardenSwap
@@ -17,16 +17,20 @@ describe('WardenSwap', () => {
   let sushiswapRoute: IWardenTradingRoute
   let curveRoute: IWardenTradingRoute
   let uniswapTokenEthTokenRoute: IWardenTradingRoute
+  let sushiswapTokenEthTokenRoute: IWardenTradingRoute
   let wardenBestRateQuery: WardenBestRateQuery
   let dai: IERC20
   let usdc: IERC20
   let usdt: IERC20
   let susd: IERC20
   let mkr: IERC20
+  let sushi: IERC20
+  let uni: IERC20
 
   let trader1: Signer
   let trader2: Signer
   let trader3: Signer
+  let trader4: Signer
 
   let partnerIndex = 0
 
@@ -59,17 +63,26 @@ describe('WardenSwap', () => {
       UNISWAP_ROUTER_ADDRESS,
       WETH_ADDRESS
     ) as IWardenTradingRoute
-    await curveRoute.deployed()
+    await uniswapTokenEthTokenRoute.deployed()
+
+    sushiswapTokenEthTokenRoute = await (await ethers.getContractFactory('UniswapV2TokenEthTokenRoute')).deploy(
+      SUSHISWAP_ROUTER_ADDRESS,
+      WETH_ADDRESS
+    ) as IWardenTradingRoute
+    await sushiswapTokenEthTokenRoute.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20
     usdc = await ethers.getContractAt(ERC20Abi, Assets.USDC.address) as IERC20
     usdt = await ethers.getContractAt(ERC20Abi, Assets.USDT.address) as IERC20
     susd = await ethers.getContractAt(ERC20Abi, Assets.SUSD.address) as IERC20
     mkr = await ethers.getContractAt(ERC20Abi, Assets.MKR.address) as IERC20
+    sushi = await ethers.getContractAt(ERC20Abi, Assets.SUSHI.address) as IERC20
+    uni = await ethers.getContractAt(ERC20Abi, Assets.UNI.address) as IERC20
 
     trader1 = await ethers.provider.getSigner(WhaleAddresses.a16zAddress)
     trader2 = await ethers.provider.getSigner(WhaleAddresses.binance7)
     trader3 = await ethers.provider.getSigner(WhaleAddresses.binance8)
+    trader4 = await ethers.provider.getSigner(WhaleAddresses.huobi10)
 
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
@@ -82,6 +95,11 @@ describe('WardenSwap', () => {
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [WhaleAddresses.binance8]}
+    )
+
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [WhaleAddresses.huobi10]}
     )
   })
 
@@ -105,6 +123,7 @@ describe('WardenSwap', () => {
     let sushiswapIndex: number
     let curveIndex: number
     let uniswapTokenEthTokenIndex: number
+    let sushiswapTokenEthTokenIndex: number
     let allRoutes: number[]
     let routesWithoutCurve: number[]
 
@@ -125,13 +144,18 @@ describe('WardenSwap', () => {
       await warden.addTradingRoute('UniswapTokenEthToken', uniswapTokenEthTokenRoute.address)
       uniswapTokenEthTokenIndex = 3
 
+      // Sushiswap Token -> ETH -> Token
+      await warden.addTradingRoute('SushiswapTokenEthToken', sushiswapTokenEthTokenRoute.address)
+      sushiswapTokenEthTokenIndex = 4
+
       await uniswapRoute.addWhitelisted(warden.address)
       await sushiswapRoute.addWhitelisted(warden.address)
       await curveRoute.addWhitelisted(warden.address)
       await uniswapTokenEthTokenRoute.addWhitelisted(warden.address)
+      await sushiswapTokenEthTokenRoute.addWhitelisted(warden.address)
 
-      allRoutes = [uniswapIndex, sushiswapIndex, curveIndex, uniswapTokenEthTokenIndex]
-      routesWithoutCurve = [uniswapIndex, sushiswapIndex, uniswapTokenEthTokenIndex]
+      allRoutes = [uniswapIndex, sushiswapIndex, curveIndex, uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex]
+      routesWithoutCurve = [uniswapIndex, sushiswapIndex, uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex]
     })
 
     // ┌──────────────────────┬──────────────────────────────┐
@@ -193,7 +217,7 @@ describe('WardenSwap', () => {
       }, {}))
     }
 
-    it('Should get route 1000 ETH -> DAI properly', async () => {
+    it('Should get split routes 1000 ETH -> DAI properly', async () => {
       const src = Assets.ETH
       const dest = Assets.DAI
       const amountIn = utils.parseUnits('1000', src.decimals)
@@ -227,8 +251,8 @@ describe('WardenSwap', () => {
       console.log('amountOut', utils.formatUnits(twoRouteOutput.amountOut, dest.decimals))
       console.log('')
 
-      const amountIn1 = amountIn.mul(twoRouteOutput.volumns[0]).div(100)
-      const amountIn2 = amountIn.sub(amountIn1)
+      // const amountIn1 = amountIn.mul(twoRouteOutput.volumns[0]).div(100)
+      // const amountIn2 = amountIn.sub(amountIn1)
       // await expect(() => warden.splitTrades(
       //   [uniswapIndex, sushiswapIndex],
       //   src.address,
@@ -257,6 +281,110 @@ describe('WardenSwap', () => {
       
       // expect(output.routeIndex).to.equal(top.routeIndex)
       // expect(output.amountOut).to.equal(top.amount)
+    })
+
+    it('Should get split routes 1000 SUSHI -> ETH properly', async () => {
+      const src = Assets.SUSHI
+      const dest = Assets.ETH
+      const amountIn = utils.parseUnits('1000', src.decimals)
+
+      const amountOuts = await getAmountOuts(src, dest, amountIn, allRoutes)
+      const top = bestRateFromAmountOuts(amountOuts)
+      console.log('top', top.route)
+      console.log('top', top.amount.toString())
+
+      await logRates(src, dest, amountIn, allRoutes)
+
+      const oneRouteOutput = await wardenBestRateQuery.oneRoute(src.address, dest.address, amountIn, allRoutes)
+      console.log('==================== One Route ====================')
+      console.log('routeIndex', oneRouteOutput.routeIndex.toString())
+      console.log('route', (await warden.tradingRoutes(oneRouteOutput.routeIndex)).name)
+      console.log('amountOut', utils.formatUnits(oneRouteOutput.amountOut, dest.decimals))
+      console.log('')
+
+
+      const twoRouteOutput = await wardenBestRateQuery.splitTwoRoutes(
+        src.address,
+        dest.address,
+        amountIn,
+        allRoutes,
+        4
+      )
+      console.log('==================== Two Route ====================')
+      console.log(`routeIndexs [${twoRouteOutput.routeIndexs[0].toString()}, ${twoRouteOutput.routeIndexs[1].toString()}]`)
+      console.log(`routeIndexs [${(await warden.tradingRoutes(twoRouteOutput.routeIndexs[0])).name}, ${(await warden.tradingRoutes(twoRouteOutput.routeIndexs[1])).name}]`)
+      console.log(`volumns [${twoRouteOutput.volumns[0].toString()}, ${twoRouteOutput.volumns[1].toString()}]`)
+      console.log('amountOut', utils.formatUnits(twoRouteOutput.amountOut, dest.decimals))
+      console.log('')
+
+      const amountIn1 = amountIn.mul(twoRouteOutput.volumns[0]).div(100)
+      const amountIn2 = amountIn.sub(amountIn1)
+
+      // await sushi.connect(trader4).approve(warden.address, ethers.constants.MaxUint256)
+      // await expect(() => warden.connect(trader4).splitTrades(
+      //   [uniswapIndex, sushiswapIndex],
+      //   src.address,
+      //   amountIn,
+      //   [amountIn1, amountIn2],
+      //   dest.address,
+      //   '1',
+      //   partnerIndex
+      // ))
+      // .to.changeEtherBalance(trader4, twoRouteOutput.amountOut.sub(1))
+    })
+
+    it('Should get split routes 1000 SUSHI -> UNI properly', async () => {
+      const src = Assets.SUSHI
+      const dest = Assets.UNI
+      const amountIn = utils.parseUnits('1000', src.decimals)
+
+      const amountOuts = await getAmountOuts(src, dest, amountIn, allRoutes)
+      const top = bestRateFromAmountOuts(amountOuts)
+      console.log('top', top.route)
+      console.log('top', top.amount.toString())
+
+      await logRates(src, dest, amountIn, allRoutes)
+
+      const oneRouteOutput = await wardenBestRateQuery.oneRoute(src.address, dest.address, amountIn, allRoutes)
+      console.log('==================== One Route ====================')
+      console.log('routeIndex', oneRouteOutput.routeIndex.toString())
+      console.log('route', (await warden.tradingRoutes(oneRouteOutput.routeIndex)).name)
+      console.log('amountOut', utils.formatUnits(oneRouteOutput.amountOut, dest.decimals))
+      console.log('')
+
+      console.log('before splitTwoRoutes')
+      const twoRouteOutput = await wardenBestRateQuery.splitTwoRoutes(
+        src.address,
+        dest.address,
+        amountIn,
+        allRoutes,
+        4,
+        {
+          gasLimit: 100000000
+        }
+      )
+      console.log('after splitTwoRoutes')
+      console.log('==================== Two Route ====================')
+      console.log(`routeIndexs [${twoRouteOutput.routeIndexs[0].toString()}, ${twoRouteOutput.routeIndexs[1].toString()}]`)
+      console.log(`routeIndexs [${(await warden.tradingRoutes(twoRouteOutput.routeIndexs[0])).name}, ${(await warden.tradingRoutes(twoRouteOutput.routeIndexs[1])).name}]`)
+      console.log(`volumns [${twoRouteOutput.volumns[0].toString()}, ${twoRouteOutput.volumns[1].toString()}]`)
+      console.log('amountOut', utils.formatUnits(twoRouteOutput.amountOut, dest.decimals))
+      console.log('')
+
+      const amountIn1 = amountIn.mul(twoRouteOutput.volumns[0]).div(100)
+      const amountIn2 = amountIn.sub(amountIn1)
+
+      // await sushi.connect(trader4).approve(warden.address, ethers.constants.MaxUint256)
+      // await expect(() => warden.connect(trader4).splitTrades(
+      //   [twoRouteOutput.routeIndexs[0], twoRouteOutput.routeIndexs[1]],
+      //   src.address,
+      //   amountIn,
+      //   [amountIn1, amountIn2],
+      //   dest.address,
+      //   '1',
+      //   partnerIndex
+      // ))
+      // .to.changeTokenBalance(uni, trader4, twoRouteOutput.amountOut)
     })
   })
 })
