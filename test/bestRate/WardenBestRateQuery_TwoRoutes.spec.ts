@@ -11,6 +11,8 @@ import { IERC20 } from '../../typechain/IERC20'
 import '@openzeppelin/test-helpers'
 import { UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
 
+const MAX_BEST_RATE_SPLIT_ROUTES_QUERY_GAS_LIMIT = 100000000 // 100M
+
 describe('WardenSwap', () => {
   let warden: WardenSwap
   let uniswapRoute: IWardenTradingRoute
@@ -360,7 +362,7 @@ describe('WardenSwap', () => {
         allRoutes,
         4,
         {
-          gasLimit: 100000000
+          gasLimit: MAX_BEST_RATE_SPLIT_ROUTES_QUERY_GAS_LIMIT
         }
       )
       console.log('after splitTwoRoutes')
@@ -386,5 +388,48 @@ describe('WardenSwap', () => {
       // ))
       // .to.changeTokenBalance(uni, trader4, twoRouteOutput.amountOut)
     })
+
+    it('Should get split routes with gas limit properly', async () => {
+      const src = Assets.SUSHI
+      const dest = Assets.UNI
+      const amountIn = utils.parseUnits('1000', src.decimals)
+
+      const amountOuts = await getAmountOuts(src, dest, amountIn, allRoutes)
+      const top = bestRateFromAmountOuts(amountOuts)
+      console.log('top', top.route)
+      console.log('top', top.amount.toString())
+
+      await logRates(src, dest, amountIn, allRoutes)
+
+      const oneRouteOutput = await wardenBestRateQuery.oneRoute(src.address, dest.address, amountIn, allRoutes)
+      console.log('==================== One Route ====================')
+      console.log('routeIndex', oneRouteOutput.routeIndex.toString())
+      console.log('route', (await warden.tradingRoutes(oneRouteOutput.routeIndex)).name)
+      console.log('amountOut', utils.formatUnits(oneRouteOutput.amountOut, dest.decimals))
+      console.log('')
+
+      console.log('before splitTwoRoutes')
+      const twoRouteOutput = await wardenBestRateQuery.splitTwoRoutes(
+        src.address,
+        dest.address,
+        amountIn,
+        [uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex,
+         uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex,
+         uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex,
+         uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex,
+         uniswapTokenEthTokenIndex, sushiswapTokenEthTokenIndex],
+        10,
+        {
+          gasLimit: MAX_BEST_RATE_SPLIT_ROUTES_QUERY_GAS_LIMIT
+        }
+      )
+      console.log('after splitTwoRoutes')
+      console.log('==================== Two Route ====================')
+      console.log(`routeIndexs [${twoRouteOutput.routeIndexs[0].toString()}, ${twoRouteOutput.routeIndexs[1].toString()}]`)
+      console.log(`routeIndexs [${(await warden.tradingRoutes(twoRouteOutput.routeIndexs[0])).name}, ${(await warden.tradingRoutes(twoRouteOutput.routeIndexs[1])).name}]`)
+      console.log(`volumns [${twoRouteOutput.volumns[0].toString()}, ${twoRouteOutput.volumns[1].toString()}]`)
+      console.log('amountOut', utils.formatUnits(twoRouteOutput.amountOut, dest.decimals))
+      console.log('')
+    }).timeout(60000)
   })
 })
