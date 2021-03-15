@@ -6,12 +6,12 @@ import { expect } from 'chai'
 import ERC20Abi from '../helpers/erc20Abi.json'
 import WhaleAddresses from '../helpers/whaleAddresses.json'
 import { main as Assets } from '../helpers/assets'
-import { CurveSusdTradingRoute } from '../../typechain/CurveSusdTradingRoute'
+import { CurveSusdRoute } from '../../typechain/CurveSusdRoute'
 import { IERC20 } from '../../typechain/IERC20'
 import '@openzeppelin/test-helpers'
 
-describe('CurveSusdTradingRoute', () => {
-  let route: CurveSusdTradingRoute
+describe('CurveSusdRoute', () => {
+  let route: CurveSusdRoute
   let dai: IERC20
   let usdc: IERC20
   let usdt: IERC20
@@ -26,8 +26,8 @@ describe('CurveSusdTradingRoute', () => {
   const [wallet1, wallet2, wallet3, wallet4, other] = provider.getWallets()
 
   beforeEach(async () => {
-    const Route = await ethers.getContractFactory('CurveSusdTradingRoute')
-    route = await Route.deploy() as CurveSusdTradingRoute
+    const Route = await ethers.getContractFactory('CurveSusdRoute')
+    route = await Route.deploy() as CurveSusdRoute
     await route.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20

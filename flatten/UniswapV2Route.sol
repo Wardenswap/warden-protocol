@@ -754,7 +754,7 @@ pragma solidity 0.5.17;
 
 
 
-contract UniswapV2TradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
+contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IUniswapV2Router public router;

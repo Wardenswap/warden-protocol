@@ -6,11 +6,11 @@ import { expect } from 'chai'
 import ERC20Abi from '../helpers/erc20Abi.json'
 import WhaleAddresses from '../helpers/whaleAddresses.json'
 import { main as Assets } from '../helpers/assets'
-import { SushiswapV2TradingRoute } from '../../typechain/SushiswapV2TradingRoute'
+import { SushiswapRoute } from '../../typechain/SushiswapRoute'
 import { IERC20 } from '../../typechain/IERC20'
 
-describe('SushiswapV2TradingRoute', () => {
-  let route: SushiswapV2TradingRoute
+describe('SushiswapRoute', () => {
+  let route: SushiswapRoute
   let dai: IERC20
   let usdc: IERC20
   let usdt: IERC20
@@ -26,8 +26,8 @@ describe('SushiswapV2TradingRoute', () => {
   const [wallet1, wallet2, wallet3, wallet4, other] = provider.getWallets()
 
   beforeEach(async () => {
-    const Route = await ethers.getContractFactory('SushiswapV2TradingRoute')
-    route = await Route.deploy() as SushiswapV2TradingRoute
+    const Route = await ethers.getContractFactory('SushiswapRoute')
+    route = await Route.deploy() as SushiswapRoute
     await route.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20

@@ -16,16 +16,16 @@ describe('RoutingManagement', function() {
     this.manager = await (await ethers.getContractFactory('RoutingManagement')).deploy()
     await this.manager.deployed()
 
-    this.uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy(
+    this.uniswapRoute = await (await ethers.getContractFactory('UniswapV2Route')).deploy(
       UNISWAP_ROUTER_ADDRESS,
       WETH_ADDRESS
     )
     await this.uniswapRoute.deployed()
 
-    this.sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy()
+    this.sushiswapRoute = await (await ethers.getContractFactory('SushiswapRoute')).deploy()
     await this.sushiswapRoute.deployed()
 
-    this.curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy()
+    this.curveRoute = await (await ethers.getContractFactory('CurveSusdRoute')).deploy()
     await this.curveRoute.deployed()
 
     this.dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address)

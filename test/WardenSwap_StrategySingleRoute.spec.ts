@@ -47,16 +47,16 @@ describe('WardenSwap: Single route strategy', () => {
     const partner0 = await warden.partners(0)
     await warden.updatePartner(0, reserve.address, partner0.fee, partner0.name)
 
-    uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy(
+    uniswapRoute = await (await ethers.getContractFactory('UniswapV2Route')).deploy(
       UNISWAP_ROUTER_ADDRESS,
       WETH_ADDRESS
     ) as IWardenTradingRoute
     await uniswapRoute.deployed()
 
-    sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy() as IWardenTradingRoute
+    sushiswapRoute = await (await ethers.getContractFactory('SushiswapRoute')).deploy() as IWardenTradingRoute
     await sushiswapRoute.deployed()
 
-    curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy() as IWardenTradingRoute
+    curveRoute = await (await ethers.getContractFactory('CurveSusdRoute')).deploy() as IWardenTradingRoute
     await curveRoute.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address)

@@ -8,7 +8,7 @@ import "../interfaces/IWardenTradingRoute.sol";
 import "../interfaces/IUniswapV2Router.sol";
 
 
-contract UniswapV2TokenEthTokenTradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
+contract UniswapV2TokenEthTokenRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IUniswapV2Router public router;

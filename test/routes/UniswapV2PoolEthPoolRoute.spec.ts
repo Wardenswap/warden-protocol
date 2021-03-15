@@ -6,7 +6,7 @@ import { expect } from 'chai'
 import ERC20Abi from '../helpers/erc20Abi.json'
 import WhaleAddresses from '../helpers/whaleAddresses.json'
 import { main as Assets } from '../helpers/assets'
-import { UniswapV2PoolEthPoolTradingRoute } from '../../typechain/UniswapV2PoolEthPoolTradingRoute'
+import { UniswapV2PoolToPoolTokenEthTokenRoute } from '../../typechain/UniswapV2PoolToPoolTokenEthTokenRoute'
 import { IERC20 } from '../../typechain/IERC20'
 import { IUniswapV2Router } from '../../typechain/IUniswapV2Router'
 import { abi as UniswapV2RouterAbi } from '../../artifacts/contracts/interfaces/IUniswapV2Router.sol/IUniswapV2Router.json'
@@ -14,7 +14,7 @@ import '@openzeppelin/test-helpers'
 import { UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS, WETH_ADDRESS } from '../constants'
 
 describe('UniswapV2PoolEthPoolRoute', () => {
-  let route: UniswapV2PoolEthPoolTradingRoute
+  let route: UniswapV2PoolToPoolTokenEthTokenRoute
   let dai: IERC20
   let usdc: IERC20
   let usdt: IERC20
@@ -29,12 +29,12 @@ describe('UniswapV2PoolEthPoolRoute', () => {
   const [wallet1, wallet2, wallet3, wallet4, other] = provider.getWallets()
 
   beforeEach(async () => {
-    const Route = await ethers.getContractFactory('UniswapV2PoolEthPoolTradingRoute')
+    const Route = await ethers.getContractFactory('UniswapV2PoolToPoolTokenEthTokenRoute')
     route = await Route.deploy(
       UNISWAP_ROUTER_ADDRESS,
       SUSHISWAP_ROUTER_ADDRESS,
       WETH_ADDRESS
-    ) as UniswapV2PoolEthPoolTradingRoute
+    ) as UniswapV2PoolToPoolTokenEthTokenRoute
     await route.deployed()
 
     dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20

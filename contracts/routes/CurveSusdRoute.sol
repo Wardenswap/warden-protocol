@@ -16,7 +16,7 @@ interface ICurve {
     function exchange_underlying(int128 i, int128 j, uint256 dx, uint256 min_dy) external;
 }
 
-contract CurveSusdTradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
+contract CurveSusdRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     ICurve public constant susdPool = ICurve(0xA5407eAE9Ba41422680e2e00537571bcC53efBfD);

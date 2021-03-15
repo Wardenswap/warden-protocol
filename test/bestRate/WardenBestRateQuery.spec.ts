@@ -43,19 +43,19 @@ describe('WardenSwap', () => {
     wardenBestRateQuery = await (await ethers.getContractFactory('WardenBestRateQuery')).deploy(warden.address) as WardenBestRateQuery
     await wardenBestRateQuery.deployed()
 
-    uniswapRoute = await (await ethers.getContractFactory('UniswapV2TradingRoute')).deploy(
+    uniswapRoute = await (await ethers.getContractFactory('UniswapV2Route')).deploy(
       UNISWAP_ROUTER_ADDRESS,
       WETH_ADDRESS
     ) as IWardenTradingRoute
     await uniswapRoute.deployed()
 
-    sushiswapRoute = await (await ethers.getContractFactory('SushiswapV2TradingRoute')).deploy() as IWardenTradingRoute
+    sushiswapRoute = await (await ethers.getContractFactory('SushiswapRoute')).deploy() as IWardenTradingRoute
     await sushiswapRoute.deployed()
 
-    curveRoute = await (await ethers.getContractFactory('CurveSusdTradingRoute')).deploy() as IWardenTradingRoute
+    curveRoute = await (await ethers.getContractFactory('CurveSusdRoute')).deploy() as IWardenTradingRoute
     await curveRoute.deployed()
 
-    uniswapTokenEthTokenRoute = await (await ethers.getContractFactory('UniswapV2TokenEthTokenTradingRoute')).deploy(
+    uniswapTokenEthTokenRoute = await (await ethers.getContractFactory('UniswapV2TokenEthTokenRoute')).deploy(
       UNISWAP_ROUTER_ADDRESS,
       WETH_ADDRESS
     ) as IWardenTradingRoute

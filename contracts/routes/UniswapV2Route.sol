@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 import "../interfaces/IUniswapV2Router.sol";
 
-contract UniswapV2TradingRoute is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
+contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IUniswapV2Router public router;
