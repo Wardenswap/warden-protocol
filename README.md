@@ -11,15 +11,15 @@ All DEX on Binance Smart Chain is AMM. But everything comes with a price. AMM so
 
 Here comes the solution. Wardenswap prices from multiple pools to find the best price across all pools. Not only that, Wardenswap also split trading amounts across multiple routes in a single transaction to make the trade make an even better price as you can see in the following image:
 
-![submit-swap](https://raw.githubusercontent.com/Wardenswap/warden-protocol/features/update-readme/images/send-trade.png)
+![submit-swap](https://raw.githubusercontent.com/Wardenswap/warden-protocol/main/images/send-trade.png)
 
 For example, if a user wants to trade BNB into BUSD but their trade will make a high price impact on a single pool. Wardenswap will split the trade into 2 different routes and trade 2 pools simultaneously. (This can be up to any number of pools!). So the bigger the DEX market be, the better price Wardenswap will provide.
 
-![receive-swap](https://raw.githubusercontent.com/Wardenswap/warden-protocol/features/update-readme/images/receive-trade.png)
+![receive-swap](https://raw.githubusercontent.com/Wardenswap/warden-protocol/main/images/receive-trade.png)
 
 More than that, Wardenswap can also find deep routing if there is an in-between route to make the price even better, Wardenswap will include it in-between the transaction automatically.
 
-![deep-route](https://raw.githubusercontent.com/Wardenswap/warden-protocol/features/update-readme/images/deep-route.png)
+![deep-route](https://raw.githubusercontent.com/Wardenswap/warden-protocol/main/images/deep-route.png)
 
 For example, if a user wants to trade BNB into BUSD. But there is an in-between WAD-BNB route that can make this trade even better(Even if that route is on another pool!). Wardenswap will convert BNB into WAD and WAD into BUSD.
 
