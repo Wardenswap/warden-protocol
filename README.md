@@ -2,6 +2,8 @@
 
 ## How it works?
 
+![cover](https://raw.githubusercontent.com/Wardenswap/warden-protocol/main/images/cover.png)
+
 Wardenswap is not just another decentralized exchange (DEX). As someone might have noticed, When you trade on Wardenswap, you will receive a much better price than any other DEXs. Besides that, If there is another pool that has a price ready to be arbitraged. Wardenswap will also take the deal for you. Wardenswap is not just an exchange. Wardenswap is the gateway to all decentralized exchanges on the earth. This is how it works.
 
 Nowadays, AMM is the state of the art of decentralized exchange since the order book system will not work if the market is illiquid and all transactions on the blockchain cost you some gas. No one really wants to pay unnecessary gas to make an offer not knowing if their offer will be matched or not.
