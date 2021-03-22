@@ -23,7 +23,7 @@ More than that, Wardenswap can also find deep routing if there is an in-between 
 
 ![deep-route](https://raw.githubusercontent.com/Wardenswap/warden-protocol/main/images/deep-route.png)
 
-For example, if a user wants to trade BNB into BUSD. But there is an in-between WAD-BNB route that can make this trade even better(Even if that route is on another pool!). Wardenswap will convert BNB into WAD and WAD into BUSD.
+For example, if a user wants to trade BNB into BUSD. But there is an in-between WAD-BNB route that can make this trade even better(Even if that pair is on another pool!). Wardenswap will convert BNB to WAD in Warden Pool and convert WAD to BUSD in Bekery Pool.
 
 In another word, Wardenswap auto arbitrage the entire market for you.
 Please note that all of this happens on-chain in a single atomic transaction. Wasn’t that a cool human? But if you think this is already cool, there are a lot of jaw-dropping features waiting to be released soon.
