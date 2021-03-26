@@ -32,7 +32,7 @@ describe('WardenUV2Router', () => {
     const Router = await ethers.getContractFactory('WardenUV2Router')
     router = await Router.deploy(
       [UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS],
-      WETH_ADDRESS
+      [WETH_ADDRESS]
     ) as WardenUV2Router
     await router.deployed()
 
@@ -53,12 +53,12 @@ describe('WardenUV2Router', () => {
     expect(await router.routers(0)).to.properAddress
     expect(await router.routers(1)).to.properAddress
     expect(await router.etherERC20()).to.properAddress
-    expect(await router.wETH()).to.properAddress
+    expect(await router.correspondentTokens(0)).to.properAddress
 
     expect(await router.routers(0)).to.equal(UNISWAP_ROUTER_ADDRESS)
     expect(await router.routers(1)).to.equal(SUSHISWAP_ROUTER_ADDRESS)
     expect(await router.etherERC20()).to.equal(Assets.ETH.address)
-    expect(await router.wETH()).to.equal(WETH_ADDRESS)
+    expect(await router.correspondentTokens(0)).to.equal(WETH_ADDRESS)
     expect(await router.amountOutMin()).to.equal('1')
     expect(await router.deadline()).to.equal(ethers.constants.MaxUint256)
   })
@@ -116,7 +116,7 @@ describe('WardenUV2Router', () => {
           value: amountIn
         }
       ))
-      .to.revertedWith('Ether exchange is not supported')
+      .to.revertedWith('WUV2R: Ether exchange is not supported')
     })
   
     it('Should not allow trade 100 MKR -> ETH', async () => {
@@ -128,7 +128,7 @@ describe('WardenUV2Router', () => {
         Assets.ETH.address,
         amountIn
       ))
-      .to.revertedWith('Ether exchange is not supported')
+      .to.revertedWith('WUV2R: Ether exchange is not supported')
     })
   
     it('Should get rate 0 when trading with ETH', async () => {
@@ -154,14 +154,14 @@ describe('WardenUV2Router', () => {
         Assets.MKR.address,
         amountIn
       ))
-      .to.be.revertedWith('destination token can not be source token')
+      .to.be.revertedWith('WUV2R: Destination token can not be source token')
     })
   
     it('Should not get rate if source and destination token are the same', async () => {
       const amountIn = utils.parseEther('100')
   
       await expect(router.getDestinationReturnAmount(Assets.MKR.address, Assets.MKR.address, amountIn))
-      .to.revertedWith('destination token can not be source token')
+      .to.revertedWith('WUV2R: Destination token can not be source token')
     })
   })
 
