@@ -117,7 +117,7 @@ describe('WardenUV2Router', () => {
           value: amountIn
         }
       ))
-      .to.revertedWith('WUV2R: Ether exchange is not supported')
+      .to.revertedWith('UniswapV2Library: IDENTICAL_ADDRESSES')
     })
   
     it('Should not allow trade 100 MKR -> ETH', async () => {
@@ -129,7 +129,7 @@ describe('WardenUV2Router', () => {
         Assets.ETH.address,
         amountIn
       ))
-      .to.revertedWith('WUV2R: Ether exchange is not supported')
+      .to.revertedWith('UniswapV2Library: IDENTICAL_ADDRESSES')
     })
   
     it('Should get rate 0 when trading with ETH', async () => {

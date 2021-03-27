@@ -116,6 +116,9 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
     {
         // TODO: check if duplicate tokens in routes
         require(_src != _dest, "WUV2R: Destination token can not be source token");
+        if (isDuplicatedTokenInRoutes(_src) || isDuplicatedTokenInRoutes(_dest)) {
+            return 0;
+        }
 
         IERC20 src;
         IERC20 dest;
@@ -132,5 +135,23 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
             srcAmount = amounts[amounts.length - 1];
         }
         _destAmount = srcAmount;
+    }
+
+    function isDuplicatedTokenInRoutes(
+        IERC20 token
+    )
+        internal
+        view
+        returns (bool)
+    {
+        if (token == etherERC20) {
+            token = wETH;
+        }
+        for (uint256 i = 0; i < correspondentTokens.length; i++) {
+            if(token == correspondentTokens[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 }
