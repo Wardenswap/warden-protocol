@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 import "../interfaces/IUniswapV2Router.sol";
 
-
 contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -15,6 +14,7 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
     IERC20[] public correspondentTokens;
 
     IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public wETH;
     uint256 public constant amountOutMin = 1;
     uint256 public constant deadline = 2 ** 256 - 1;
 
@@ -22,15 +22,16 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
 
     constructor(
         IUniswapV2Router[] memory _routers,
-        IERC20[] memory _correspondentTokens
+        IERC20[] memory _correspondentTokens,
+        IERC20 _wETH
     ) public {
-        // require(_routers.length >= 1, "WUV2R: Invalid lengths1");
-        // require(correspondentTokens.length == routers.length - 1, "WUV2R: Invalid lengths2");
         require(_routers.length >= 1 && _correspondentTokens.length == _routers.length - 1, "WUV2R: Invalid lengths");
         routers = _routers;
         correspondentTokens = _correspondentTokens;
 
         allRoutersLength = routers.length;
+
+        wETH = _wETH;
     }
     
     function trade(
@@ -45,40 +46,61 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
         returns(uint256 _destAmount)
     {
         require(_src != _dest, "WUV2R: Destination token can not be source token");
-        require(_src != etherERC20 && _dest != etherERC20, "WUV2R: Ether exchange is not supported");
 
-        // TOKEN (Pool1) => CTOKEN1 => TOKEN (Pool2)
-        _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
-        _src.safeApprove(address(routers[0]), _srcAmount);
+        if (_src == etherERC20) {
+            require(msg.value == _srcAmount, "WUV2R: Source amount mismatch");
+        } else {
+            _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
+        }
 
-        uint256 srcAmount2;
-        {
+        IERC20 src;
+        IERC20 dest;
+        uint256 srcAmount = _srcAmount;
+        // Exchange token pairs to each routes
+        for (uint256 i = 0; i < routers.length; i++) {
+            src = i == 0 ? _src : correspondentTokens[i - 1];
+            dest = i == routers.length - 1 ? _dest : correspondentTokens[i];
+            
             address[] memory path = new address[](2);
-            path[0] = address(_src);
-            path[1] = address(correspondentTokens[0]);
-            uint256[] memory amounts = routers[0].swapExactTokensForTokens(
-                _srcAmount,
-                amountOutMin,
-                path,
-                address(this),
-                deadline
-            );
-            srcAmount2 = amounts[amounts.length - 1];
+            if (src == etherERC20) {
+                path[0] = address(wETH);
+                path[1] = address(dest);
+                uint256[] memory amounts = routers[i].swapExactETHForTokens.value(srcAmount)(
+                    amountOutMin,
+                    path,
+                    i == routers.length - 1 ? msg.sender : address(this),
+                    deadline
+                );
+                srcAmount = amounts[amounts.length - 1];
+
+            } else if (dest == etherERC20) {
+                path[0] = address(src);
+                path[1] = address(wETH);
+                src.safeApprove(address(routers[i]), srcAmount);
+                uint256[] memory amounts = routers[i].swapExactTokensForETH(
+                    srcAmount,
+                    amountOutMin,
+                    path,
+                    i == routers.length - 1 ? msg.sender : address(this),
+                    deadline
+                );
+                srcAmount = amounts[amounts.length - 1];
+
+            } else {
+                path[0] = address(src);
+                path[1] = address(dest);
+                src.safeApprove(address(routers[i]), srcAmount);
+                uint256[] memory amounts = routers[i].swapExactTokensForTokens(
+                    srcAmount,
+                    amountOutMin,
+                    path,
+                    i == routers.length - 1 ? msg.sender : address(this),
+                    deadline
+                );
+                srcAmount = amounts[amounts.length - 1];
+            }
         }
-        {
-            correspondentTokens[0].safeApprove(address(routers[1]), srcAmount2);
-            address[] memory path = new address[](2);
-            path[0] = address(correspondentTokens[0]);
-            path[1] = address(_dest);
-            uint256[] memory amounts = routers[1].swapExactTokensForTokens(
-                srcAmount2,
-                amountOutMin,
-                path,
-                msg.sender,
-                deadline
-            );
-            _destAmount = amounts[amounts.length - 1];
-        }
+        _destAmount = srcAmount;
 
         emit Trade(_src, _srcAmount, _dest, _destAmount);
     }
@@ -92,25 +114,23 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
         view
         returns(uint256 _destAmount)
     {
+        // TODO: check if duplicate tokens in routes
         require(_src != _dest, "WUV2R: Destination token can not be source token");
-        if (_src == etherERC20) { // ETH => TOKEN
-            _destAmount = 0;
-        } else if (_dest == etherERC20) { // TOKEN => ETH
-            _destAmount = 0;
-        } else { // TOKEN (Pool1) => CTOKEN1 => TOKEN (Pool2)
-            uint256 srcAmount2;
-            {
-                address[] memory path = new address[](2);
-                path[0] = address(_src);
-                path[1] = address(correspondentTokens[0]);
-                uint256[] memory amounts = routers[0].getAmountsOut(_srcAmount, path);
-                srcAmount2 = amounts[amounts.length - 1];
-            }
+
+        IERC20 src;
+        IERC20 dest;
+        uint256 srcAmount = _srcAmount;
+        // Fetch prices by token pairs to each routes
+        for (uint256 i = 0; i < routers.length; i++) {
+            src = i == 0 ? _src : correspondentTokens[i - 1];
+            dest = i == routers.length - 1 ? _dest : correspondentTokens[i];
+            
             address[] memory path = new address[](2);
-            path[0] = address(correspondentTokens[0]);
-            path[1] = address(_dest);
-            uint256[] memory amounts = routers[1].getAmountsOut(srcAmount2, path);
-            _destAmount = amounts[amounts.length - 1];
+            path[0] = src == etherERC20 ? address(wETH) : address(src);
+            path[1] = dest == etherERC20 ? address(wETH) : address(dest);
+            uint256[] memory amounts = routers[i].getAmountsOut(srcAmount, path);
+            srcAmount = amounts[amounts.length - 1];
         }
+        _destAmount = srcAmount;
     }
 }

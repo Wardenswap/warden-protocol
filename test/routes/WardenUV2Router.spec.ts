@@ -32,7 +32,8 @@ describe('WardenUV2Router', () => {
     const Router = await ethers.getContractFactory('WardenUV2Router')
     router = await Router.deploy(
       [UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS],
-      [WETH_ADDRESS]
+      [WETH_ADDRESS],
+      WETH_ADDRESS
     ) as WardenUV2Router
     await router.deployed()
 
