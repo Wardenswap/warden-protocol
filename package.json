@@ -10,9 +10,9 @@
     "flatten_route-uniswap":  "npx hardhat flatten contracts/routes/UniswapV2Route.sol > flatten/UniswapV2Route.sol",
     "flatten_route-uniswap-token-eth-token":  "npx hardhat flatten contracts/routes/UniswapV2TokenEthTokenRoute.sol > flatten/UniswapV2TokenEthTokenRoute.sol",
     "flatten_route-pool-to-pool-token-eth-token":  "npx hardhat flatten contracts/routes/UniswapV2PoolToPoolTokenEthTokenRoute.sol > flatten/UniswapV2PoolToPoolTokenEthTokenRoute.sol",
-    "flatten_route-curve":  "npx hardhat flatten contracts/routes/CurveRoute.sol > flatten/CurveRoute.sol",
     "flatten_route-spartan":  "npx hardhat flatten contracts/routes/SpartanRoute.sol > flatten/SpartanRoute.sol",
-    "flatten_warden_uv2_router":  "npx hardhat flatten contracts/routes/WardenUV2Router.sol > flatten/WardenUV2Router.sol",
+    "flatten_warden-uv2-router":  "npx hardhat flatten contracts/routes/WardenUV2Router.sol > flatten/WardenUV2Router.sol",
+    "flatten_warden-curve-router":  "npx hardhat flatten contracts/routes/WardenCurveRouter.sol > flatten/WardenCurveRouter.sol",
     "flatten_bestrate-query":  "npx hardhat flatten contracts/bestRate/WardenBestRateQuery.sol > flatten/WardenBestRateQuery.sol",
     "test": "TS_NODE_TRANSPILE_ONLY=1 npx hardhat test",
     "test:coverage": "NODE_OPTIONS=\"--max-old-space-size=2048\" hardhat coverage"
