@@ -895,7 +895,6 @@ contract WardenUV2Router is IWardenTradingRoute, WhitelistedRole, ReentrancyGuar
         view
         returns(uint256 _destAmount)
     {
-        // TODO: check if duplicate tokens in routes
         require(_src != _dest, "WUV2R: Destination token can not be source token");
         if (isDuplicatedTokenInRoutes(_src) || isDuplicatedTokenInRoutes(_dest)) {
             return 0;

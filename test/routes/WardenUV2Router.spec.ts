@@ -332,7 +332,7 @@ describe('WardenUV2Router2 UNI-USDC-UNI', () => {
       .to.changeEtherBalance(wallet1, BigNumber.from('0').sub(amountIn))
     })
   
-    it('Should not allow trade 100,000 DAI -> ETH', async () => {
+    it('Should trade 100,000 DAI -> ETH correctly', async () => {
       const src = Assets.DAI
       const dest = Assets.ETH
       const amountIn = utils.parseUnits('100000', src.decimals)
@@ -544,7 +544,7 @@ describe('WardenUV2Router2 UNI-USDC-SUSHI', () => {
       .to.changeEtherBalance(wallet1, BigNumber.from('0').sub(amountIn))
     })
   
-    it('Should not allow trade 100,000 DAI -> ETH', async () => {
+    it('Should trade 100,000 DAI -> ETH correctly', async () => {
       const src = Assets.DAI
       const dest = Assets.ETH
       const amountIn = utils.parseUnits('100000', src.decimals)
@@ -622,5 +622,209 @@ describe('WardenUV2Router2 UNI-USDC-SUSHI', () => {
 
     expect(await router.getDestinationReturnAmount(src.address, dest.address, amountIn))
     .to.be.equal(amountOuts2[amountOuts2.length - 1])
+  })
+})
+
+describe('WardenUV2Router2 UNI-ETH-UNI-USDC-SUSHI', () => {
+  let router: WardenUV2Router
+  let dai: IERC20
+  let usdc: IERC20
+  let usdt: IERC20
+  let susd: IERC20
+  let mkr: IERC20
+
+  let trader1: Signer
+  let trader2: Signer
+  let trader3: Signer
+
+  const provider = waffle.provider
+  const [wallet1, wallet2, wallet3, wallet4, other] = provider.getWallets()
+
+  beforeEach(async () => {
+    const Router = await ethers.getContractFactory('WardenUV2Router')
+    router = await Router.deploy(
+      [UNISWAP_ROUTER_ADDRESS, UNISWAP_ROUTER_ADDRESS, SUSHISWAP_ROUTER_ADDRESS],
+      [WETH_ADDRESS, Assets.USDC.address],
+      WETH_ADDRESS
+    ) as WardenUV2Router
+    await router.deployed()
+
+    dai = await ethers.getContractAt(ERC20Abi, Assets.DAI.address) as IERC20
+    usdc = await ethers.getContractAt(ERC20Abi, Assets.USDC.address) as IERC20
+    usdt = await ethers.getContractAt(ERC20Abi, Assets.USDT.address) as IERC20
+    mkr = await ethers.getContractAt(ERC20Abi, Assets.MKR.address) as IERC20
+
+    trader1 = await ethers.provider.getSigner(WhaleAddresses.a16zAddress)
+    trader2 = await ethers.provider.getSigner(WhaleAddresses.binance7)
+    trader3 = await ethers.provider.getSigner(WhaleAddresses.binance8)
+
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [WhaleAddresses.a16zAddress]}
+    )
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [WhaleAddresses.binance7]}
+    )
+  })
+
+  it('Should initial data correctly', async () => {
+    expect(await router.routers(0)).to.properAddress
+    expect(await router.routers(1)).to.properAddress
+    expect(await router.routers(2)).to.properAddress
+    expect(await router.etherERC20()).to.properAddress
+    expect(await router.wETH()).to.properAddress
+    expect(await router.correspondentTokens(0)).to.properAddress
+    expect(await router.correspondentTokens(1)).to.properAddress
+
+    expect(await router.allRoutersLength()).to.equal(3)
+    expect(await router.routers(0)).to.equal(UNISWAP_ROUTER_ADDRESS)
+    expect(await router.routers(1)).to.equal(UNISWAP_ROUTER_ADDRESS)
+    expect(await router.routers(2)).to.equal(SUSHISWAP_ROUTER_ADDRESS)
+    expect(await router.etherERC20()).to.equal(Assets.ETH.address)
+    expect(await router.wETH()).to.equal(WETH_ADDRESS)
+    expect(await router.correspondentTokens(0)).to.equal(WETH_ADDRESS)
+    expect(await router.correspondentTokens(1)).to.equal(Assets.USDC.address)
+    expect(await router.amountOutMin()).to.equal('1')
+    expect(await router.deadline()).to.equal(ethers.constants.MaxUint256)
+  })
+
+  describe('Allowlist traders', async () => {
+    beforeEach(async () => {
+      await router.addWhitelisted(wallet1.address)
+      await router.addWhitelisted(await trader1.getAddress())
+      await router.addWhitelisted(await trader2.getAddress())
+      await router.addWhitelisted(await trader3.getAddress())
+    })
+
+    it('Should emit Trade event properly', async function () {
+      const amountIn = utils.parseEther('1')
+      let amountOut: BigNumber = await router.getDestinationReturnAmount(Assets.MKR.address, Assets.DAI.address, amountIn)
+  
+      await mkr.connect(trader1).approve(router.address, ethers.constants.MaxUint256)
+      await expect(await router.connect(trader1).trade(
+        Assets.MKR.address,
+        Assets.DAI.address,
+        amountIn
+      ))
+      .to.emit(router, 'Trade')
+      .withArgs(Assets.MKR.address, amountIn, Assets.DAI.address, amountOut)
+    })
+  
+    it('Should trade 100,000 DAI -> USDT correctly', async () => {
+      const amountIn = utils.parseEther('100000')
+      const src = Assets.DAI
+      const dest = Assets.USDT 
+      let amountOut: BigNumber = await router.getDestinationReturnAmount(src.address, dest.address, amountIn)
+      console.log('100,000 DAI -> ? USDT', utils.formatUnits(amountOut, dest.decimals))
+  
+      await dai.connect(trader2).approve(router.address, ethers.constants.MaxUint256)
+      await expect(() =>  router.connect(trader2).trade(
+        src.address,
+        dest.address,
+        amountIn
+      ))
+      .to.changeTokenBalance(usdt, trader2, amountOut)
+  
+      await expect(() =>  router.connect(trader2).trade(
+        src.address,
+        dest.address,
+        amountIn
+      ))
+      .to.changeTokenBalance(dai, trader2, BigNumber.from('0').sub(amountIn))
+    })
+  
+    it('Should trade 100 MKR -> USDT correctly', async () => {
+      const src = Assets.MKR
+      const dest = Assets.USDT
+      const amountIn = utils.parseUnits('100', src.decimals)
+      let amountOut: BigNumber = await router.getDestinationReturnAmount(src.address, dest.address, amountIn)
+      console.log('100 MKR -> ? DAI', utils.formatUnits(amountOut, dest.decimals))
+  
+      await mkr.connect(trader1).approve(router.address, ethers.constants.MaxUint256)
+      await expect(() =>  router.connect(trader1).trade(
+        src.address,
+        dest.address,
+        amountIn
+      ))
+      .to.changeTokenBalance(usdt, trader1, amountOut)
+  
+      await expect(() =>  router.connect(trader1).trade(
+        src.address,
+        dest.address,
+        amountIn
+      ))
+      .to.changeTokenBalance(mkr, trader1, BigNumber.from('0').sub(amountIn))
+    })
+
+    it('Should trade fail when trading with ETH', async () => {
+      const amountIn2 = utils.parseEther('100')
+      await expect(router.trade(
+        Assets.ETH.address,
+        Assets.USDC.address,
+        amountIn2,
+        {
+          value: amountIn2
+        }
+      )).to.be.revertedWith('UniswapV2Library: IDENTICAL_ADDRESSES')
+    })
+
+    it('Should trade fail when trading with USDC', async () => {
+      const amountIn2 = utils.parseEther('100')
+      await expect(router.trade(
+        Assets.ETH.address,
+        Assets.USDC.address,
+        amountIn2,
+        {
+          value: amountIn2
+        }
+      )).to.be.revertedWith('UniswapV2Library: IDENTICAL_ADDRESSES')
+    })
+
+    it('Should get rate 0 when trading with ETH', async () => {
+      const amountIn = utils.parseEther('100')
+      expect(await router.getDestinationReturnAmount(Assets.ETH.address, Assets.DAI.address, amountIn))
+      .to.equal(0)
+
+      expect(await router.getDestinationReturnAmount(Assets.USDT.address, Assets.ETH.address, amountIn))
+      .to.equal(0)
+    })
+  
+    it('Should get rate 0 when trading with USDC', async () => {
+      const amountIn = utils.parseUnits('50', Assets.USDC.decimals)
+      expect(await router.getDestinationReturnAmount(Assets.USDC.address, Assets.DAI.address, amountIn))
+      .to.equal(0)
+  
+      expect(await router.getDestinationReturnAmount(Assets.ETH.address, Assets.USDC.address, amountIn))
+      .to.equal(0)
+
+      expect(await router.getDestinationReturnAmount(Assets.USDT.address, Assets.USDC.address, amountIn))
+      .to.equal(0)
+    })
+  
+    it('Should get rate properly', async () => {
+      const amountIn = utils.parseUnits('1000', Assets.USDT.decimals)
+      expect(await router.getDestinationReturnAmount(Assets.USDT.address, Assets.DAI.address, amountIn))
+      .to.not.equal(0)
+    })
+  })
+
+
+  it('Should get rate correctly', async () => {
+    const src = Assets.DAI
+    const dest = Assets.USDT
+    const amountIn = utils.parseEther('1000000')
+
+    // Uniswap route
+    const uniswap = await ethers.getContractAt(UniswapV2RouterAbi, UNISWAP_ROUTER_ADDRESS) as IUniswapV2Router
+    const amountOuts1 = await uniswap.getAmountsOut(amountIn, [src.address, WETH_ADDRESS])
+    const amountOuts2 = await uniswap.getAmountsOut(amountOuts1[amountOuts1.length - 1], [WETH_ADDRESS, usdc.address])
+
+    // Sushiswap route
+    const sushiswap = await ethers.getContractAt(UniswapV2RouterAbi, SUSHISWAP_ROUTER_ADDRESS) as IUniswapV2Router
+    const amountOuts3 = await sushiswap.getAmountsOut(amountOuts2[amountOuts2.length - 1], [usdc.address, dest.address])
+
+    expect(await router.getDestinationReturnAmount(src.address, dest.address, amountIn))
+    .to.be.equal(amountOuts3[amountOuts3.length - 1])
   })
 })
