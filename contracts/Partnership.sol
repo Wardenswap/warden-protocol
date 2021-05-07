@@ -60,6 +60,8 @@ contract Partnership is RoutingManagement {
         external
         onlyOwner
     {
+        require(wallet != address(0), "wallet: not allow address 0");
+        require(name.length != 0, "name: not allow empty name");
         require(fee <= 100, "fee: no more than 1%");
         Partner memory partner = Partner(wallet, fee, name);
         partners[index] = partner;
