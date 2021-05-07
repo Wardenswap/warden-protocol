@@ -20,7 +20,7 @@ interface IWarden {
 contract WardenBestRateQuery {
     using SafeMath for uint256;
 
-    uint256 public constant partnerIndex = 0;
+    uint256 public constant PARTNER_INDEX = 0;
 
     IWarden public warden;
 
@@ -39,8 +39,8 @@ contract WardenBestRateQuery {
     returns (uint256) // amountOut 
     {
         // fail-safe getting rate, equal to
-        // uint256 _amountOut = warden.getDestinationReturnAmount(routes[i], src, dest, srcAmount, partnerIndex);
-        bytes memory payload = abi.encodeWithSelector(warden.getDestinationReturnAmount.selector, route, src, dest, srcAmount, partnerIndex);
+        // uint256 _amountOut = warden.getDestinationReturnAmount(routes[i], src, dest, srcAmount, PARTNER_INDEX);
+        bytes memory payload = abi.encodeWithSelector(warden.getDestinationReturnAmount.selector, route, src, dest, srcAmount, PARTNER_INDEX);
         (bool success, bytes memory data) = address(warden).staticcall(payload);
         if (success) {
             return abi.decode(data, (uint256));

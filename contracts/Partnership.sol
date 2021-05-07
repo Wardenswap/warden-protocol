@@ -46,7 +46,7 @@ contract Partnership is RoutingManagement {
       bytes16 name;         // Partner reference
     }
 
-    IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public constant ETHER_ERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     mapping(uint256 => Partner) public partners;
 
@@ -98,7 +98,7 @@ contract Partnership is RoutingManagement {
         }
         uint256 fee = amount.mul(partner.fee).div(10000);
         require(fee < amount, "fee exceeds return amount!");
-        if (etherERC20 == token) {
+        if (ETHER_ERC20 == token) {
             (bool success, ) = partner.wallet.call.value(fee)(""); // Send back ether to sender
             require(success, "Transfer fee of ether failed.");
         } else {

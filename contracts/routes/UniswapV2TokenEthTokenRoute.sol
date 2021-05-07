@@ -12,10 +12,10 @@ contract UniswapV2TokenEthTokenRoute is IWardenTradingRoute, WhitelistedRole, Re
     using SafeERC20 for IERC20;
 
     IUniswapV2Router public router;
-    IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public constant ETHER_ERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
     IERC20 public wETH;
-    uint256 public constant amountOutMin = 1;
-    uint256 public constant deadline = 2 ** 256 - 1;
+    uint256 public constant AMOUNT_OUT_MIN = 1;
+    uint256 public constant DEADLINE = 2 ** 256 - 1;
 
     constructor(
         IUniswapV2Router _router,
@@ -37,7 +37,7 @@ contract UniswapV2TokenEthTokenRoute is IWardenTradingRoute, WhitelistedRole, Re
         returns(uint256 _destAmount)
     {
         require(_src != _dest, "destination token can not be source token");
-        require(_src != etherERC20 && _dest != etherERC20, "Ether exchange is not supported");
+        require(_src != ETHER_ERC20 && _dest != ETHER_ERC20, "Ether exchange is not supported");
 
         // TOKEN => TOKEN
         _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
@@ -48,10 +48,10 @@ contract UniswapV2TokenEthTokenRoute is IWardenTradingRoute, WhitelistedRole, Re
         path[2] = address(_dest);
         uint256[] memory amounts = router.swapExactTokensForTokens(
             _srcAmount,
-            amountOutMin,
+            AMOUNT_OUT_MIN,
             path,
             msg.sender,
-            deadline
+            DEADLINE
         );
         _destAmount = amounts[amounts.length - 1];
 
@@ -69,9 +69,9 @@ contract UniswapV2TokenEthTokenRoute is IWardenTradingRoute, WhitelistedRole, Re
     {
         require(_src != _dest, "destination token can not be source token");
         address[] memory path = new address[](3);
-        if (_src == etherERC20) { // ETH => TOKEN
+        if (_src == ETHER_ERC20) { // ETH => TOKEN
             return 0;
-        } else if (_dest == etherERC20) { // TOKEN => ETH
+        } else if (_dest == ETHER_ERC20) { // TOKEN => ETH
             return 0;
         } else { // TOKEN => TOKEN
             path[0] = address(_src);
