@@ -4,6 +4,7 @@ pragma solidity 0.5.17;
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../interfaces/IWardenTradingRoute.sol";
 
 interface ICurve {
@@ -18,6 +19,7 @@ interface ICurve {
 
 contract WardenCurveRouter is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard {
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
     ICurve public constant curvePool = ICurve(0xb3F0C9ea1F05e312093Fdb031E789A756659B0AC);
     IERC20 public constant busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); // 0
@@ -43,7 +45,7 @@ contract WardenCurveRouter is IWardenTradingRoute, WhitelistedRole, ReentrancyGu
         _src.safeApprove(address(curvePool), _srcAmount);
         curvePool.exchange(i, j, _srcAmount, 0);
         uint256 balanceAfter = _dest.balanceOf(address(this));
-        _destAmount = balanceAfter - balanceBefore;
+        _destAmount = balanceAfter.sub(balanceBefore);
         _dest.safeTransfer(msg.sender, _destAmount);
         emit Trade(_src, _srcAmount, _dest, _destAmount);
     }
