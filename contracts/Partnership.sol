@@ -71,7 +71,7 @@ contract Partnership is RoutingManagement {
     function _amountWithFee(uint256 amount, uint256 partnerIndex)
         internal
         view
-        returns(uint256 remainingAmount)
+        returns(uint256) // remainingAmount
     {
         Partner storage partner = partners[partnerIndex];
         if (partner.wallet == 0x0000000000000000000000000000000000000000) {
@@ -86,7 +86,7 @@ contract Partnership is RoutingManagement {
 
     function _collectFee(uint256 partnerIndex, uint256 amount, IERC20 token)
         internal
-        returns(uint256 remainingAmount)
+        returns(uint256) // remainingAmount
     {
         Partner storage partner = partners[partnerIndex];
         if (partner.wallet == 0x0000000000000000000000000000000000000000) {

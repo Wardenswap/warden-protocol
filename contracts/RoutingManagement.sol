@@ -57,10 +57,10 @@ contract RoutingManagement is Ownable {
     * @return length of trading routes.
     */
     function addTradingRoute(
-        string memory _name,
+        string calldata _name,
         IWardenTradingRoute _routingAddress
     )
-      public
+      external
       onlyOwner
     {
         tradingRoutes.push(Route({

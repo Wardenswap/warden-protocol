@@ -36,9 +36,8 @@ contract WardenBestRateQuery {
     )
     private
     view
-    returns (
-        uint256 amountOut
-    ) {
+    returns (uint256) // amountOut 
+    {
         // fail-safe getting rate, equal to
         // uint256 _amountOut = warden.getDestinationReturnAmount(routes[i], src, dest, srcAmount, partnerIndex);
         bytes memory payload = abi.encodeWithSelector(warden.getDestinationReturnAmount.selector, route, src, dest, srcAmount, partnerIndex);
@@ -82,9 +81,8 @@ contract WardenBestRateQuery {
     )
     private
     view
-    returns (
-        uint256 amountOut
-    ) {
+    returns (uint256) // amountOut
+    {
         uint256 amountIn1 = srcAmount.mul(percent1).div(100);
         uint256 amountIn2 = srcAmount.sub(amountIn1);
         uint256 _amountOut1 = _getRate(src, dest, amountIn1, route1);
