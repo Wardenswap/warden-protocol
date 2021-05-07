@@ -13,10 +13,10 @@ contract UniswapV2PoolToPoolTokenEthTokenRoute is IWardenTradingRoute, Whitelist
 
     IUniswapV2Router public router1;
     IUniswapV2Router public router2;
-    IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public constant ETHER_ERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
     IERC20 public wETH;
-    uint256 public constant amountOutMin = 1;
-    uint256 public constant deadline = 2 ** 256 - 1;
+    uint256 public constant AMOUNT_OUT_MIN = 1;
+    uint256 public constant DEADLINE = 2 ** 256 - 1;
 
     constructor(
         IUniswapV2Router _router1,
@@ -40,7 +40,7 @@ contract UniswapV2PoolToPoolTokenEthTokenRoute is IWardenTradingRoute, Whitelist
         returns(uint256 _destAmount)
     {
         require(_src != _dest, "destination token can not be source token");
-        require(_src != etherERC20 && _dest != etherERC20, "Ether exchange is not supported");
+        require(_src != ETHER_ERC20 && _dest != ETHER_ERC20, "Ether exchange is not supported");
 
         // TOKEN (Pool1) => wETH => TOKEN (Pool2)
         _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
@@ -53,10 +53,10 @@ contract UniswapV2PoolToPoolTokenEthTokenRoute is IWardenTradingRoute, Whitelist
             path[1] = address(wETH);
             uint256[] memory amounts = router1.swapExactTokensForTokens(
                 _srcAmount,
-                amountOutMin,
+                AMOUNT_OUT_MIN,
                 path,
                 address(this),
-                deadline
+                DEADLINE
             );
             srcAmount2 = amounts[amounts.length - 1];
         }
@@ -67,10 +67,10 @@ contract UniswapV2PoolToPoolTokenEthTokenRoute is IWardenTradingRoute, Whitelist
             path[1] = address(_dest);
             uint256[] memory amounts = router2.swapExactTokensForTokens(
                 srcAmount2,
-                amountOutMin,
+                AMOUNT_OUT_MIN,
                 path,
                 msg.sender,
-                deadline
+                DEADLINE
             );
             _destAmount = amounts[amounts.length - 1];
         }
@@ -88,9 +88,9 @@ contract UniswapV2PoolToPoolTokenEthTokenRoute is IWardenTradingRoute, Whitelist
         returns(uint256 _destAmount)
     {
         require(_src != _dest, "destination token can not be source token");
-        if (_src == etherERC20) { // ETH => TOKEN
+        if (_src == ETHER_ERC20) { // ETH => TOKEN
             _destAmount = 0;
-        } else if (_dest == etherERC20) { // TOKEN => ETH
+        } else if (_dest == ETHER_ERC20) { // TOKEN => ETH
             _destAmount = 0;
         } else { // TOKEN (Pool1) => wETH => TOKEN (Pool2)
             uint256 srcAmount2;

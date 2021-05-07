@@ -11,10 +11,10 @@ contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard
     using SafeERC20 for IERC20;
 
     IUniswapV2Router public router;
-    IERC20 public constant etherERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    IERC20 public constant ETHER_ERC20 = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
     IERC20 public wETH;
-    uint256 public constant amountOutMin = 1;
-    uint256 public constant deadline = 2 ** 256 - 1;
+    uint256 public constant AMOUNT_OUT_MIN = 1;
+    uint256 public constant DEADLINE = 2 ** 256 - 1;
 
     constructor(
         IUniswapV2Router _router,
@@ -36,19 +36,19 @@ contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard
         returns(uint256 _destAmount)
     {
         require(_src != _dest, "destination token can not be source token");
-        if (_src == etherERC20 && msg.value > 0) { // ETH => TOKEN
+        if (_src == ETHER_ERC20 && msg.value > 0) { // ETH => TOKEN
             require(msg.value == _srcAmount, "source amount mismatch");
             address[] memory path = new address[](2);
             path[0] = address(wETH);
             path[1] = address(_dest);
             uint256[] memory amounts = router.swapExactETHForTokens.value(msg.value)(
-                amountOutMin,
+                AMOUNT_OUT_MIN,
                 path,
                 msg.sender,
-                deadline
+                DEADLINE
             );
             _destAmount = amounts[amounts.length - 1];
-        } else if (_dest == etherERC20) { // TOKEN => ETH
+        } else if (_dest == ETHER_ERC20) { // TOKEN => ETH
             _src.safeTransferFrom(msg.sender, address(this), _srcAmount);
             _src.safeApprove(address(router), _srcAmount);
             address[] memory path = new address[](2);
@@ -56,10 +56,10 @@ contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard
             path[1] = address(wETH);
             uint256[] memory amounts = router.swapExactTokensForETH(
                 _srcAmount,
-                amountOutMin,
+                AMOUNT_OUT_MIN,
                 path,
                 msg.sender,
-                deadline
+                DEADLINE
             );
             _destAmount = amounts[amounts.length - 1];
         } else { // TOKEN => TOKEN
@@ -70,10 +70,10 @@ contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard
             path[1] = address(_dest);
             uint256[] memory amounts = router.swapExactTokensForTokens(
                 _srcAmount,
-                amountOutMin,
+                AMOUNT_OUT_MIN,
                 path,
                 msg.sender,
-                deadline
+                DEADLINE
             );
             _destAmount = amounts[amounts.length - 1];
         }
@@ -91,10 +91,10 @@ contract UniswapV2Route is IWardenTradingRoute, WhitelistedRole, ReentrancyGuard
     {
         require(_src != _dest, "destination token can not be source token");
         address[] memory path = new address[](2);
-        if (_src == etherERC20) { // ETH => TOKEN
+        if (_src == ETHER_ERC20) { // ETH => TOKEN
             path[0] = address(wETH);
             path[1] = address(_dest);
-        } else if (_dest == etherERC20) { // TOKEN => ETH
+        } else if (_dest == ETHER_ERC20) { // TOKEN => ETH
             path[0] = address(_src);
             path[1] = address(wETH);
         } else { // TOKEN => TOKEN

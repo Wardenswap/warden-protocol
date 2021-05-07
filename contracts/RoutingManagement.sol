@@ -41,12 +41,12 @@ contract RoutingManagement is Ownable {
     Route[] public tradingRoutes; // list of trading routes
 
     modifier onlyTradingRouteEnabled(uint _index) {
-        require(tradingRoutes[_index].enable == true, "This trading route is disabled");
+        require(tradingRoutes[_index].enable, "This trading route is disabled");
         _;
     }
 
     modifier onlyTradingRouteDisabled(uint _index) {
-        require(tradingRoutes[_index].enable == false, "This trading route is enabled");
+        require(tradingRoutes[_index].enable, "This trading route is enabled");
         _;
     }
 
@@ -57,10 +57,10 @@ contract RoutingManagement is Ownable {
     * @return length of trading routes.
     */
     function addTradingRoute(
-        string memory _name,
+        string calldata _name,
         IWardenTradingRoute _routingAddress
     )
-      public
+      external
       onlyOwner
     {
         tradingRoutes.push(Route({

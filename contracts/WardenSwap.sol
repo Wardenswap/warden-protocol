@@ -115,7 +115,7 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
         IWardenTradingRoute tradingRoute = tradingRoutes[tradingRouteIndex].route;
         // Trade to route
         uint256 destAmount = tradingRoute.trade.value(srcAmount)(
-            etherERC20,
+            ETHER_ERC20,
             dest,
             srcAmount
         );
@@ -148,7 +148,7 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
         // Trande to route
         uint256 destAmount = tradingRoute.trade(
             src,
-            etherERC20,
+            ETHER_ERC20,
             srcAmount
         );
         return destAmount;
@@ -213,31 +213,31 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
         uint256 srcAmountBefore;
         uint256 destAmountBefore;
 
-        if (etherERC20 == _src) { // Source
+        if (ETHER_ERC20 == _src) { // Source
             srcAmountBefore = address(this).balance;
         } else {
             srcAmountBefore = _src.balanceOf(address(this));
         }
-        if (etherERC20 == _dest) { // Dest
+        if (ETHER_ERC20 == _dest) { // Dest
             destAmountBefore = address(this).balance;
         } else {
             destAmountBefore = _dest.balanceOf(address(this));
         }
-        if (etherERC20 == _src) { // Trade ETH -> Token
+        if (ETHER_ERC20 == _src) { // Trade ETH -> Token
             destAmount = _tradeEtherToToken(_tradingRouteIndex, _srcAmount, _dest);
-        } else if (etherERC20 == _dest) { // Trade Token -> ETH
+        } else if (ETHER_ERC20 == _dest) { // Trade Token -> ETH
             destAmount = _tradeTokenToEther(_tradingRouteIndex, _src, _srcAmount);
         } else { // Trade Token -> Token
             destAmount = _tradeTokenToToken(_tradingRouteIndex, _src, _srcAmount, _dest);
         }
 
         // Recheck if src/dest amount correct
-        if (etherERC20 == _src) { // Source
+        if (ETHER_ERC20 == _src) { // Source
             require(address(this).balance == srcAmountBefore.sub(_srcAmount), "source amount mismatch after trade");
         } else {
             require(_src.balanceOf(address(this)) == srcAmountBefore.sub(_srcAmount), "source amount mismatch after trade");
         }
-        if (etherERC20 == _dest) { // Dest
+        if (ETHER_ERC20 == _dest) { // Dest
             require(address(this).balance == destAmountBefore.add(destAmount), "destination amount mismatch after trade");
         } else {
             require(_dest.balanceOf(address(this)) == destAmountBefore.add(destAmount), "destination amount mismatch after trade");
@@ -275,7 +275,7 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
     {
         uint256 destAmount;
         // Prepare source's asset
-        if (etherERC20 != src) {
+        if (ETHER_ERC20 != src) {
             src.safeTransferFrom(msg.sender, address(this), srcAmount); // Transfer token to this address
         }
         // Trade to route
@@ -286,7 +286,7 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
 
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
-        if (etherERC20 == dest) {
+        if (ETHER_ERC20 == dest) {
             (bool success, ) = msg.sender.call.value(destAmount)(""); // Send back ether to sender
             require(success, "Transfer ether back to caller failed.");
         } else { // Send back token to sender
@@ -326,7 +326,7 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
         require(routes.length == srcAmounts.length, "routes and srcAmounts lengths mismatch");
         uint256 destAmount = 0;
         // Prepare source's asset
-        if (etherERC20 != src) {
+        if (ETHER_ERC20 != src) {
             src.safeTransferFrom(msg.sender, address(this), totalSrcAmount); // Transfer token to this address
         }
         // Trade with routes
@@ -343,7 +343,7 @@ contract WardenSwap is WardenTokenPriviledge, ReentrancyGuard {
 
         // Throw exception if destination amount doesn't meet user requirement.
         require(destAmount >= minDestAmount, "destination amount is too low.");
-        if (etherERC20 == dest) {
+        if (ETHER_ERC20 == dest) {
             (bool success, ) = msg.sender.call.value(destAmount)(""); // Send back ether to sender
             require(success, "Transfer ether back to caller failed.");
         } else { // Send back token to sender
