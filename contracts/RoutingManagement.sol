@@ -41,12 +41,12 @@ contract RoutingManagement is Ownable {
     Route[] public tradingRoutes; // list of trading routes
 
     modifier onlyTradingRouteEnabled(uint _index) {
-        require(tradingRoutes[_index].enable == true, "This trading route is disabled");
+        require(tradingRoutes[_index].enable, "This trading route is disabled");
         _;
     }
 
     modifier onlyTradingRouteDisabled(uint _index) {
-        require(tradingRoutes[_index].enable == false, "This trading route is enabled");
+        require(tradingRoutes[_index].enable, "This trading route is enabled");
         _;
     }
 
